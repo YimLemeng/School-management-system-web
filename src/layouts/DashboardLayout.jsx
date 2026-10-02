@@ -1,0 +1,148 @@
+import React, { useState } from 'react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import {
+  LayoutDashboard,
+  Users,
+  Briefcase,
+  Building2,
+  BookOpen,
+  UserCheck,
+  User,
+  LogOut,
+  Menu,
+  X,
+  GraduationCap,
+  ShieldAlert,
+} from 'lucide-react';
+
+export const DashboardLayout = () => {
+  const { user, logout, hasRole } = useAuth();
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    await new Promise((r) => setTimeout(r, 400));
+    logout();
+    navigate('/login', { replace: true });
+    setLoggingOut(false);
+  };
+
+  const isAdmin = hasRole('ADMIN');
+  const isTeacher = hasRole('TEACHER');
+
+  const allNavItems = [
+    { name: 'Dashboard', path: '/', icon: LayoutDashboard, visible: true },
+    { name: 'Departments', path: '/departments', icon: Building2, visible: isAdmin },
+    { name: 'Students', path: '/students', icon: Users, visible: isAdmin || isTeacher },
+    { name: 'Teachers', path: '/teachers', icon: Briefcase, visible: isAdmin },
+    { name: 'Courses', path: '/courses', icon: BookOpen, visible: true },
+    { name: 'Enrollments', path: '/enrollments', icon: UserCheck, visible: true },
+    { name: 'My Profile', path: '/profile', icon: User, visible: true },
+  ];
+
+  const navItems = allNavItems.filter((item) => item.visible);
+
+  const primaryRole = user?.roles?.[0]?.replace('ROLE_', '') || 'USER';
+
+  return (
+    <div className="app-container">
+      {/* Mobile Top Bar */}
+      <header className="mobile-header">
+        <div className="brand-logo">
+          <GraduationCap className="icon-brand" />
+          <span>SchoolMS</span>
+        </div>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="btn-icon"
+          aria-label="Toggle Navigation"
+        >
+          {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+      </header>
+
+      {/* Sidebar */}
+      <aside className={`app-sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-brand">
+          <div className="brand-icon-wrapper">
+            <GraduationCap size={28} />
+          </div>
+          <div>
+            <h1 className="brand-title">School MS</h1>
+            <p className="brand-subtitle">Management System</p>
+          </div>
+        </div>
+
+        {/* User Card */}
+        <div className="sidebar-user-card">
+          <div className="user-avatar">
+            {user?.username?.substring(0, 2).toUpperCase() || 'US'}
+          </div>
+          <div className="user-info">
+            <p className="user-name">{user?.fullName || user?.username}</p>
+            <span className={`badge-role role-${primaryRole.toLowerCase()}`}>
+              {primaryRole}
+            </span>
+          </div>
+        </div>
+
+        {/* Navigation links */}
+        <nav className="sidebar-nav">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={item.path === '/'}
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) =>
+                  `nav-link ${isActive ? 'active' : ''}`
+                }
+              >
+                <Icon size={19} className="nav-icon" />
+                <span>{item.name}</span>
+              </NavLink>
+            );
+          })}
+        </nav>
+
+        {/* Bottom Logout */}
+        <div className="sidebar-footer">
+          <button onClick={handleLogout} className="btn-logout" disabled={loggingOut}>
+            {loggingOut ? (
+              <>
+                <span className="btn-spinner" style={{ width: 14, height: 14 }}></span>
+                <span>Signing Out...</span>
+              </>
+            ) : (
+              <>
+                <LogOut size={18} />
+                <span>Sign Out</span>
+              </>
+            )}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="app-main-content">
+        <div className="content-inner">
+          <Outlet />
+        </div>
+      </main>
+
+      {/* Backdrop for mobile */}
+      {sidebarOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+    </div>
+  );
+};
