@@ -6,15 +6,12 @@ import {
   BookOpen,
   Search,
   DollarSign,
-  Users,
   AlertCircle,
   CheckCircle2,
   Trash2,
   Plus,
   X,
-  Sparkles,
   ArrowRight,
-  Filter,
 } from 'lucide-react';
 
 export const CoursesPage = () => {

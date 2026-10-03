@@ -16,7 +16,6 @@ export const PublicRoute = ({ children }) => {
     );
   }
 
-  // If already authenticated, redirect away from public auth pages (login/register) to dashboard
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }

@@ -479,7 +479,7 @@ body {
 .stat-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   padding: 22px 24px;
   display: flex;
   align-items: center;
@@ -489,6 +489,7 @@ body {
   overflow: hidden;
   cursor: default;
   user-select: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .stat-info {
@@ -503,6 +504,7 @@ body {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .stat-label {
@@ -518,43 +520,92 @@ body {
   font-weight: 800;
   color: var(--color-text-main);
   line-height: 1.2;
+  transition: color 0.2s ease;
 }
 
-/* Stat card themes (Display only - not clickable) */
+/* Stat card themes (Display only - not clickable, with interactive hover glow & lift) */
 .stat-card-students {
-  border-top: 3.5px solid #2563eb;
+  border-top: 4px solid #2563eb;
 }
 .stat-icon-students {
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: #ffffff;
   box-shadow: 0 6px 14px rgba(59, 130, 246, 0.35);
 }
+.stat-card-students:hover {
+  transform: translateY(-5px);
+  background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 100%);
+  border-color: #3b82f6;
+  box-shadow: 0 16px 32px -4px rgba(37, 99, 235, 0.2);
+}
+.stat-card-students:hover .stat-value {
+  color: #1d4ed8;
+}
+.stat-card-students:hover .stat-icon-wrapper {
+  transform: scale(1.05);
+}
 
 .stat-card-teachers {
-  border-top: 3.5px solid #d97706;
+  border-top: 4px solid #d97706;
 }
 .stat-icon-teachers {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: #ffffff;
   box-shadow: 0 6px 14px rgba(245, 158, 11, 0.35);
 }
+.stat-card-teachers:hover {
+  transform: translateY(-5px);
+  background: linear-gradient(180deg, #fffcf0 0%, #ffffff 100%);
+  border-color: #f59e0b;
+  box-shadow: 0 16px 32px -4px rgba(217, 119, 6, 0.2);
+}
+.stat-card-teachers:hover .stat-value {
+  color: #b45309;
+}
+.stat-card-teachers:hover .stat-icon-wrapper {
+  transform: scale(1.05);
+}
 
 .stat-card-courses {
-  border-top: 3.5px solid #7c3aed;
+  border-top: 4px solid #7c3aed;
 }
 .stat-icon-courses {
   background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
   color: #ffffff;
   box-shadow: 0 6px 14px rgba(139, 92, 246, 0.35);
 }
+.stat-card-courses:hover {
+  transform: translateY(-5px);
+  background: linear-gradient(180deg, #faf5ff 0%, #ffffff 100%);
+  border-color: #8b5cf6;
+  box-shadow: 0 16px 32px -4px rgba(124, 58, 237, 0.2);
+}
+.stat-card-courses:hover .stat-value {
+  color: #6d28d9;
+}
+.stat-card-courses:hover .stat-icon-wrapper {
+  transform: scale(1.05);
+}
 
 .stat-card-security {
-  border-top: 3.5px solid #059669;
+  border-top: 4px solid #059669;
 }
 .stat-icon-security {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #ffffff;
   box-shadow: 0 6px 14px rgba(16, 185, 129, 0.35);
+}
+.stat-card-security:hover {
+  transform: translateY(-5px);
+  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+  border-color: #10b981;
+  box-shadow: 0 16px 32px -4px rgba(5, 150, 105, 0.2);
+}
+.stat-card-security:hover .stat-value {
+  color: #047857;
+}
+.stat-card-security:hover .stat-icon-wrapper {
+  transform: scale(1.05);
 }
 
 .stat-role-highlight {
