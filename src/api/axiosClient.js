@@ -35,7 +35,6 @@ axiosClient.interceptors.response.use(
     ) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('currentUser');
-      // Only redirect if not already on login page
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }

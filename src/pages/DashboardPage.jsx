@@ -13,7 +13,6 @@ import {
   UserCheck,
   ShieldCheck,
   ArrowRight,
-  TrendingUp,
   Sparkles,
 } from 'lucide-react';
 
@@ -119,12 +118,7 @@ export const DashboardPage = () => {
       {/* Stats Cards */}
       <div className="stats-grid">
         {(isAdmin || isTeacher) && (
-          <div
-            className="stat-card stat-card-students clickable"
-            onClick={() => handleNavigate('/students')}
-            role="button"
-            tabIndex={0}
-          >
+          <div className="stat-card stat-card-students">
             <div className="stat-icon-wrapper stat-icon-students">
               <Users size={24} />
             </div>
@@ -134,19 +128,11 @@ export const DashboardPage = () => {
                 {stats.loading ? '...' : stats.studentsCount}
               </h3>
             </div>
-            <div className="stat-trend-icon">
-              <TrendingUp size={16} />
-            </div>
           </div>
         )}
 
         {isAdmin && (
-          <div
-            className="stat-card stat-card-teachers clickable"
-            onClick={() => handleNavigate('/teachers')}
-            role="button"
-            tabIndex={0}
-          >
+          <div className="stat-card stat-card-teachers">
             <div className="stat-icon-wrapper stat-icon-teachers">
               <Briefcase size={24} />
             </div>
@@ -156,18 +142,10 @@ export const DashboardPage = () => {
                 {stats.loading ? '...' : stats.teachersCount}
               </h3>
             </div>
-            <div className="stat-trend-icon">
-              <TrendingUp size={16} />
-            </div>
           </div>
         )}
 
-        <div
-          className="stat-card stat-card-courses clickable"
-          onClick={() => handleNavigate('/courses')}
-          role="button"
-          tabIndex={0}
-        >
+        <div className="stat-card stat-card-courses">
           <div className="stat-icon-wrapper stat-icon-courses">
             <BookOpen size={24} />
           </div>
@@ -176,9 +154,6 @@ export const DashboardPage = () => {
             <h3 className="stat-value">
               {stats.loading ? '...' : stats.coursesCount}
             </h3>
-          </div>
-          <div className="stat-trend-icon">
-            <TrendingUp size={16} />
           </div>
         </div>
 

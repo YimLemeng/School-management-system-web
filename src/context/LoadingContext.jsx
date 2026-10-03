@@ -115,12 +115,14 @@ export const LoadingProvider = ({ children }) => {
       const targetBtn = e.target.closest('button, [data-loading-title]');
       if (!targetBtn) return;
 
-      // Skip passive controls
+      // Skip passive controls or modals
       if (
         targetBtn.classList.contains('btn-close') ||
         targetBtn.classList.contains('btn-toggle-eye') ||
         targetBtn.classList.contains('btn-dismiss') ||
         targetBtn.classList.contains('btn-icon') ||
+        targetBtn.classList.contains('btn-logout-trigger') ||
+        targetBtn.getAttribute('data-no-loading') === 'true' ||
         targetBtn.disabled
       ) {
         return;

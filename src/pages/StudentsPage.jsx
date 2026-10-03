@@ -245,15 +245,15 @@ export const StudentsPage = () => {
             />
           </div>
 
-          <div className="filter-group">
-            <Filter size={18} className="text-gray-400" />
+          <div className="filter-group select-wrapper-with-icon">
+            <Filter size={16} className="select-lead-icon" />
             <select
               value={gender}
               onChange={(e) => {
                 setGender(e.target.value);
                 setPageNo(0);
               }}
-              className="select-input"
+              className="select-input select-with-lead-icon"
             >
               <option value="">All Genders</option>
               <option value="MALE">Male</option>

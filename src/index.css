@@ -487,27 +487,12 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
   position: relative;
   overflow: hidden;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.stat-card.clickable {
-  cursor: pointer;
+  cursor: default;
   user-select: none;
 }
 
 .stat-info {
   flex: 1;
-}
-
-.stat-trend-icon {
-  opacity: 0.35;
-  color: var(--color-text-muted);
-  transition: all 0.2s ease;
-}
-
-.stat-card:hover .stat-trend-icon {
-  opacity: 1;
-  transform: translateY(-2px);
 }
 
 .stat-icon-wrapper {
@@ -517,7 +502,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
 }
 
@@ -536,7 +520,7 @@ body {
   line-height: 1.2;
 }
 
-/* Stat card themes */
+/* Stat card themes (Display only - not clickable) */
 .stat-card-students {
   border-top: 3.5px solid #2563eb;
 }
@@ -544,17 +528,6 @@ body {
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: #ffffff;
   box-shadow: 0 6px 14px rgba(59, 130, 246, 0.35);
-}
-.stat-card-students:hover {
-  border-color: #60a5fa;
-  background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px -4px rgba(37, 99, 235, 0.2);
-}
-.stat-card-students:active {
-  transform: scale(0.97);
-  background: #dbeafe;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
 }
 
 .stat-card-teachers {
@@ -565,17 +538,6 @@ body {
   color: #ffffff;
   box-shadow: 0 6px 14px rgba(245, 158, 11, 0.35);
 }
-.stat-card-teachers:hover {
-  border-color: #fcd34d;
-  background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px -4px rgba(217, 119, 6, 0.2);
-}
-.stat-card-teachers:active {
-  transform: scale(0.97);
-  background: #fef3c7;
-  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.25);
-}
 
 .stat-card-courses {
   border-top: 3.5px solid #7c3aed;
@@ -585,17 +547,6 @@ body {
   color: #ffffff;
   box-shadow: 0 6px 14px rgba(139, 92, 246, 0.35);
 }
-.stat-card-courses:hover {
-  border-color: #c4b5fd;
-  background: linear-gradient(180deg, #faf5ff 0%, #ffffff 100%);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px -4px rgba(124, 58, 237, 0.2);
-}
-.stat-card-courses:active {
-  transform: scale(0.97);
-  background: #ede9fe;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
-}
 
 .stat-card-security {
   border-top: 3.5px solid #059669;
@@ -604,17 +555,6 @@ body {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #ffffff;
   box-shadow: 0 6px 14px rgba(16, 185, 129, 0.35);
-}
-.stat-card-security:hover {
-  border-color: #6ee7b7;
-  background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px -4px rgba(5, 150, 105, 0.2);
-}
-.stat-card-security:active {
-  transform: scale(0.97);
-  background: #d1fae5;
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.25);
 }
 
 .stat-role-highlight {
@@ -906,6 +846,95 @@ body {
   }
 }
 
+/* ==========================================================================
+   Sign Out Confirmation Modal (Matches user mockup 100%)
+   ========================================================================== */
+.signout-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99990;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeInBackdrop 0.2s ease-out;
+}
+
+.signout-modal-card {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 28px 28px 24px 28px;
+  width: 100%;
+  max-width: 410px;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(15, 23, 42, 0.05);
+  animation: scaleInCard 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.signout-modal-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 14px 0;
+  line-height: 1.25;
+}
+
+.signout-modal-message {
+  font-size: 0.98rem;
+  font-weight: 400;
+  color: #334155;
+  line-height: 1.5;
+  margin: 0 0 28px 0;
+}
+
+.signout-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-signout-cancel {
+  background: transparent;
+  border: none;
+  color: #4f46e5;
+  font-size: 0.96rem;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-signout-cancel:hover {
+  background: #f1f5f9;
+  color: #4338ca;
+}
+
+.btn-signout-confirm {
+  background: #ef4444;
+  border: none;
+  color: #ffffff;
+  font-size: 0.96rem;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+  transition: all 0.15s ease;
+}
+
+.btn-signout-confirm:hover {
+  background: #dc2626;
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+}
+
+.btn-signout-confirm:active {
+  transform: scale(0.97);
+}
+
 /* Auth Pages */
 .auth-page-container {
   min-height: 100vh;
@@ -1035,8 +1064,7 @@ input[type="date"],
   transition: all 0.15s;
 }
 
-.input-without-icon,
-.select-input {
+.input-without-icon {
   width: 100%;
   height: 42px;
   padding: 0 14px;
@@ -1049,12 +1077,84 @@ input[type="date"],
   transition: all 0.15s;
 }
 
+/* ==========================================================================
+   Modern Custom Select Component (Crisp custom chevron, no native arrows)
+   ========================================================================== */
+.select-input,
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  height: 42px;
+  padding: 0 38px 0 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-main);
+  background-color: var(--color-surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 12px) center;
+  background-size: 16px 16px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.select-input:hover,
+select:hover {
+  border-color: #94a3b8;
+  background-color: #f8fafc;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.select-input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  box-shadow: 0 0 0 3.5px rgba(79, 70, 229, 0.15);
+}
+
+.select-input option,
+select option {
+  background: #ffffff;
+  color: #1e293b;
+  padding: 8px 12px;
+}
+
+.select-wrapper-with-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.select-lead-icon {
+  position: absolute;
+  left: 12px;
+  color: #64748b;
+  pointer-events: none;
+  z-index: 2;
+  transition: color 0.15s ease;
+}
+
+.select-wrapper-with-icon:focus-within .select-lead-icon {
+  color: var(--color-primary);
+}
+
+.select-with-lead-icon {
+  padding-left: 36px !important;
+}
+
 .form-group input:not(.input-with-icon input) {
   padding-left: 14px;
 }
 
-input:focus,
-select:focus {
+input:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);

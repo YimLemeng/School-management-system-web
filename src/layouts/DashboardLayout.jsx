@@ -23,8 +23,14 @@ export const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [loggingOut, setLoggingOut] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  const handleLogout = async () => {
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = async () => {
+    setShowLogoutModal(false);
     setLoggingOut(true);
     triggerLoading('Signing out...', 'កំពុងចាកចេញពីប្រព័ន្ធ សូមរង់ចាំ...', 600);
     await new Promise((r) => setTimeout(r, 450));
@@ -124,7 +130,13 @@ export const DashboardLayout = () => {
 
         {/* Bottom Logout */}
         <div className="sidebar-footer">
-          <button onClick={handleLogout} className="btn-logout" disabled={loggingOut}>
+          <button
+            type="button"
+            onClick={handleLogoutClick}
+            className="btn-logout btn-logout-trigger"
+            data-no-loading="true"
+            disabled={loggingOut}
+          >
             {loggingOut ? (
               <>
                 <span className="btn-spinner" style={{ width: 14, height: 14 }}></span>
@@ -153,6 +165,45 @@ export const DashboardLayout = () => {
           className="sidebar-backdrop"
           onClick={() => setSidebarOpen(false)}
         />
+      )}
+
+      {/* Sign Out Confirmation Modal (Matches user mockup 100%) */}
+      {showLogoutModal && (
+        <div
+          className="signout-modal-backdrop"
+          onClick={() => !loggingOut && setShowLogoutModal(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="signout-modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="signout-modal-title">Sign Out</h3>
+            <p className="signout-modal-message">
+              Are you sure you want to log out of your account?
+            </p>
+            <div className="signout-modal-actions">
+              <button
+                type="button"
+                className="btn-signout-cancel"
+                data-no-loading="true"
+                onClick={() => setShowLogoutModal(false)}
+                disabled={loggingOut}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn-signout-confirm"
+                onClick={confirmLogout}
+                disabled={loggingOut}
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
