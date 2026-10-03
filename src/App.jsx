@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { LoadingProvider } from './context/LoadingContext';
+import { RouteLoadingWatcher } from './components/RouteLoadingWatcher';
 import { PublicRoute } from './components/PublicRoute';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { DashboardLayout } from './layouts/DashboardLayout';
@@ -17,8 +19,10 @@ import { ProfilePage } from './pages/ProfilePage';
 export function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
+      <LoadingProvider>
+        <RouteLoadingWatcher />
+        <AuthProvider>
+          <Routes>
           {/* Public Auth Routes (Auto-redirect if already logged in) */}
           <Route
             path="/login"
@@ -80,7 +84,8 @@ export function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
-    </BrowserRouter>
+    </LoadingProvider>
+  </BrowserRouter>
   );
 }
 

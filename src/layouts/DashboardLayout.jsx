@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLoading, ROUTE_LOADING_CONFIG } from '../context/LoadingContext';
 import {
   LayoutDashboard,
   Users,
@@ -13,11 +14,11 @@ import {
   Menu,
   X,
   GraduationCap,
-  ShieldAlert,
 } from 'lucide-react';
 
 export const DashboardLayout = () => {
   const { user, logout, hasRole } = useAuth();
+  const { triggerLoading } = useLoading();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -25,7 +26,8 @@ export const DashboardLayout = () => {
 
   const handleLogout = async () => {
     setLoggingOut(true);
-    await new Promise((r) => setTimeout(r, 400));
+    triggerLoading('Signing out...', 'កំពុងចាកចេញពីប្រព័ន្ធ សូមរង់ចាំ...', 600);
+    await new Promise((r) => setTimeout(r, 450));
     logout();
     navigate('/login', { replace: true });
     setLoggingOut(false);
@@ -35,13 +37,13 @@ export const DashboardLayout = () => {
   const isTeacher = hasRole('TEACHER');
 
   const allNavItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard, visible: true },
-    { name: 'Departments', path: '/departments', icon: Building2, visible: isAdmin },
-    { name: 'Students', path: '/students', icon: Users, visible: isAdmin || isTeacher },
-    { name: 'Teachers', path: '/teachers', icon: Briefcase, visible: isAdmin },
-    { name: 'Courses', path: '/courses', icon: BookOpen, visible: true },
-    { name: 'Enrollments', path: '/enrollments', icon: UserCheck, visible: true },
-    { name: 'My Profile', path: '/profile', icon: User, visible: true },
+    { name: 'Dashboard', path: '/', icon: LayoutDashboard, visible: true, theme: 'dashboard' },
+    { name: 'Departments', path: '/departments', icon: Building2, visible: isAdmin, theme: 'departments' },
+    { name: 'Students', path: '/students', icon: Users, visible: isAdmin || isTeacher, theme: 'students' },
+    { name: 'Teachers', path: '/teachers', icon: Briefcase, visible: isAdmin, theme: 'teachers' },
+    { name: 'Courses', path: '/courses', icon: BookOpen, visible: true, theme: 'courses' },
+    { name: 'Enrollments', path: '/enrollments', icon: UserCheck, visible: true, theme: 'enrollments' },
+    { name: 'My Profile', path: '/profile', icon: User, visible: true, theme: 'profile' },
   ];
 
   const navItems = allNavItems.filter((item) => item.visible);
@@ -99,13 +101,22 @@ export const DashboardLayout = () => {
                 key={item.path}
                 to={item.path}
                 end={item.path === '/'}
-                onClick={() => setSidebarOpen(false)}
+                onClick={() => {
+                  setSidebarOpen(false);
+                  const config = ROUTE_LOADING_CONFIG[item.path];
+                  if (config) {
+                    triggerLoading(config.title, config.subtitle, 450);
+                  }
+                }}
                 className={({ isActive }) =>
                   `nav-link ${isActive ? 'active' : ''}`
                 }
               >
-                <Icon size={19} className="nav-icon" />
-                <span>{item.name}</span>
+                <div className="nav-icon-box">
+                  <Icon size={19} className="nav-icon" />
+                </div>
+                <span className="nav-text">{item.name}</span>
+                <span className="nav-active-pill" />
               </NavLink>
             );
           })}
