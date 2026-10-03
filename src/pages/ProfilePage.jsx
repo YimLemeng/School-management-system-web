@@ -17,7 +17,6 @@ export const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Change Password Form State
   const [passData, setPassData] = useState({
     currentPassword: '',
     newPassword: '',

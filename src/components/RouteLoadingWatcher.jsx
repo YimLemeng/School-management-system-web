@@ -10,7 +10,6 @@ export const RouteLoadingWatcher = () => {
   useEffect(() => {
     const currentPath = location.pathname;
 
-    // Show loading on route change or initial load
     if (prevPathRef.current !== currentPath) {
       const config = ROUTE_LOADING_CONFIG[currentPath];
       if (config) {

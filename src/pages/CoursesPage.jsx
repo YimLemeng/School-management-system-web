@@ -24,12 +24,10 @@ export const CoursesPage = () => {
   const [success, setSuccess] = useState('');
   const [deletingId, setDeletingId] = useState(null);
 
-  // Filters
   const [search, setSearch] = useState('');
   const [maxFee, setMaxFee] = useState('');
   const [availableOnly, setAvailableOnly] = useState(false);
 
-  // Add Course Modal State
   const [showAddModal, setShowAddModal] = useState(false);
   const [submittingCourse, setSubmittingCourse] = useState(false);
   const initialCourseForm = {

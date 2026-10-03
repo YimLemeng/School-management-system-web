@@ -25,24 +25,20 @@ export const EnrollmentsPage = () => {
   const [courses, setCourses] = useState([]);
   const [loadingInitial, setLoadingInitial] = useState(true);
 
-  // Form State
   const [studentId, setStudentId] = useState('');
   const [courseId, setCourseId] = useState(preselectedCourseId);
   const [discountPercentage, setDiscountPercentage] = useState('');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Results State
   const [successResult, setSuccessResult] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
   const [error, setError] = useState('');
 
-  // Selected Student Enrollments State (Auto-synced)
   const [studentEnrollments, setStudentEnrollments] = useState([]);
   const [loadingEnrollments, setLoadingEnrollments] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
 
-  // Find the student profile matching the currently logged-in user
   const loggedInStudent = students.find((s) => {
     if (user?.email && s.email && s.email.trim().toLowerCase() === user.email.trim().toLowerCase()) return true;
     if (user?.fullName && `${s.firstName} ${s.lastName}`.trim().toLowerCase() === user.fullName.trim().toLowerCase()) return true;
@@ -139,14 +135,12 @@ export const EnrollmentsPage = () => {
     loadOptions();
   }, [user, isStudent]);
 
-  // For students, lock studentId to their loggedInStudent profile
   useEffect(() => {
     if (isStudent && loggedInStudent) {
       setStudentId(loggedInStudent.id.toString());
     }
   }, [isStudent, loggedInStudent]);
 
-  // Automatically fetch enrolled courses whenever the selected student changes
   useEffect(() => {
     if (studentId) {
       fetchStudentEnrollments(studentId);
@@ -182,7 +176,6 @@ export const EnrollmentsPage = () => {
       setSuccessResult(res.data);
       setDiscountPercentage('');
       setNotes('');
-      // Live refresh enrolled courses and available seats
       fetchStudentEnrollments(effectiveStudentId);
       refreshCourses();
     } catch (err) {

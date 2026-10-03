@@ -21,11 +21,8 @@ export const DepartmentsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  // Search filter
   const [search, setSearch] = useState('');
 
-  // Modal State (Add & Edit)
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
