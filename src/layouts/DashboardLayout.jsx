@@ -61,7 +61,11 @@ export const DashboardLayout = () => {
       {/* Mobile Top Bar */}
       <header className="mobile-header">
         <div className="brand-logo">
-          <GraduationCap className="icon-brand" />
+          <img
+            src="/favicon.svg"
+            alt="School MS Logo"
+            style={{ width: 28, height: 28, borderRadius: 8, marginRight: 8, display: 'inline-block', verticalAlign: 'middle' }}
+          />
           <span>SchoolMS</span>
         </div>
         <button
@@ -76,8 +80,12 @@ export const DashboardLayout = () => {
       {/* Sidebar */}
       <aside className={`app-sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-brand">
-          <div className="brand-icon-wrapper">
-            <GraduationCap size={28} />
+          <div className="brand-icon-wrapper" style={{ padding: 0, background: 'transparent' }}>
+            <img
+              src="/favicon.svg"
+              alt="School MS Logo"
+              style={{ width: 44, height: 44, borderRadius: 12, display: 'block', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)' }}
+            />
           </div>
           <div>
             <h1 className="brand-title">School MS</h1>
