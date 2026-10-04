@@ -15,6 +15,7 @@ import {
   X,
   GraduationCap,
 } from 'lucide-react';
+import { SchoolLogo } from '../components/SchoolLogo';
 
 export const DashboardLayout = () => {
   const { user, logout, hasRole } = useAuth();
@@ -60,12 +61,8 @@ export const DashboardLayout = () => {
     <div className="app-container">
       {/* Mobile Top Bar */}
       <header className="mobile-header">
-        <div className="brand-logo">
-          <img
-            src="/favicon.svg"
-            alt="School MS Logo"
-            style={{ width: 28, height: 28, borderRadius: 8, marginRight: 8, display: 'inline-block', verticalAlign: 'middle' }}
-          />
+        <div className="brand-logo" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <SchoolLogo size={28} shadow={false} />
           <span>SchoolMS</span>
         </div>
         <button
@@ -81,11 +78,7 @@ export const DashboardLayout = () => {
       <aside className={`app-sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-brand">
           <div className="brand-icon-wrapper" style={{ padding: 0, background: 'transparent' }}>
-            <img
-              src="/favicon.svg"
-              alt="School MS Logo"
-              style={{ width: 44, height: 44, borderRadius: 12, display: 'block', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)' }}
-            />
+            <SchoolLogo size={44} />
           </div>
           <div>
             <h1 className="brand-title">School MS</h1>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { GraduationCap, Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { SchoolLogo } from '../components/SchoolLogo';
 
 export const LoginPage = () => {
   const { login } = useAuth();
@@ -43,11 +44,7 @@ export const LoginPage = () => {
       <div className="auth-card">
         <div className="auth-header">
           <div className="auth-icon-badge" style={{ background: 'transparent', padding: 0, boxShadow: 'none' }}>
-            <img
-              src="/favicon.svg"
-              alt="School MS Logo"
-              style={{ width: 64, height: 64, borderRadius: 16, display: 'block', margin: '0 auto', boxShadow: '0 8px 20px rgba(37, 99, 235, 0.28)' }}
-            />
+            <SchoolLogo size={64} />
           </div>
           <h2>Welcome Back</h2>
           <p>Sign in to your School Management System</p>
