@@ -11,6 +11,7 @@ import {
   X,
   Search,
   Users,
+  RotateCw,
 } from 'lucide-react';
 
 export const DepartmentsPage = () => {
@@ -19,13 +20,24 @@ export const DepartmentsPage = () => {
 
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [toast, setToast] = useState(null);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   const [search, setSearch] = useState('');
 
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [modalError, setModalError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
 
@@ -39,14 +51,17 @@ export const DepartmentsPage = () => {
 
   const fetchDepartments = async () => {
     setLoading(true);
-    setError('');
     try {
       const res = await departmentApi.getAllDepartments();
       if (res.data) {
         setDepartments(res.data || []);
       }
     } catch (err) {
-      setError(err.message || 'Failed to load departments.');
+      setToast({
+        type: 'error',
+        title: 'Failed to load departments',
+        message: err.message || 'Could not fetch departments list.',
+      });
     } finally {
       setLoading(false);
     }
@@ -64,6 +79,7 @@ export const DepartmentsPage = () => {
   const handleOpenAdd = () => {
     setIsEditing(false);
     setEditingId(null);
+    setModalError('');
     setFormData(initialForm);
     setShowModal(true);
   };
@@ -71,6 +87,7 @@ export const DepartmentsPage = () => {
   const handleOpenEdit = (dept) => {
     setIsEditing(true);
     setEditingId(dept.id);
+    setModalError('');
     setFormData({
       name: dept.name || '',
       code: dept.code || '',
@@ -82,8 +99,7 @@ export const DepartmentsPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    setError('');
-    setSuccess('');
+    setModalError('');
 
     try {
       const payload = {
@@ -93,23 +109,25 @@ export const DepartmentsPage = () => {
       };
 
       if (isEditing) {
-        await Promise.all([
-          departmentApi.updateDepartment(editingId, payload),
-          new Promise((r) => setTimeout(r, 450)),
-        ]);
-        setSuccess('Department updated successfully!');
+        await departmentApi.updateDepartment(editingId, payload);
+        setToast({
+          type: 'success',
+          title: 'Department Updated',
+          message: `Department "${payload.name}" has been updated.`,
+        });
       } else {
-        await Promise.all([
-          departmentApi.createDepartment(payload),
-          new Promise((r) => setTimeout(r, 450)),
-        ]);
-        setSuccess('Department created successfully!');
+        await departmentApi.createDepartment(payload);
+        setToast({
+          type: 'success',
+          title: 'Department Created',
+          message: `Department "${payload.name}" has been registered.`,
+        });
       }
 
       setShowModal(false);
       fetchDepartments();
     } catch (err) {
-      setError(err.message || `Failed to ${isEditing ? 'update' : 'create'} department.`);
+      setModalError(err.message || `Failed to ${isEditing ? 'update' : 'create'} department.`);
     } finally {
       setSubmitting(false);
     }
@@ -121,17 +139,20 @@ export const DepartmentsPage = () => {
     }
 
     setDeletingId(id);
-    setError('');
-    setSuccess('');
     try {
-      await Promise.all([
-        departmentApi.deleteDepartment(id),
-        new Promise((r) => setTimeout(r, 450)),
-      ]);
-      setSuccess(`Department "${name}" deleted successfully.`);
+      await departmentApi.deleteDepartment(id);
+      setToast({
+        type: 'success',
+        title: 'Department Deleted',
+        message: `Department "${name}" has been removed.`,
+      });
       fetchDepartments();
     } catch (err) {
-      setError(err.message || 'Failed to delete department.');
+      setToast({
+        type: 'error',
+        title: 'Delete Failed',
+        message: err.message || 'Failed to delete department.',
+      });
     } finally {
       setDeletingId(null);
     }
@@ -149,6 +170,29 @@ export const DepartmentsPage = () => {
 
   return (
     <div className="page-content">
+      {/* Floating Modern Toast Notification */}
+      {toast && (
+        <div className="app-toast-container">
+          <div className={`app-toast app-toast-${toast.type}`}>
+            <div className="app-toast-icon-wrap">
+              {toast.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+            </div>
+            <div className="app-toast-content">
+              <h4 className="app-toast-title">{toast.title}</h4>
+              {toast.message && <p className="app-toast-message">{toast.message}</p>}
+            </div>
+            <button
+              type="button"
+              onClick={() => setToast(null)}
+              className="app-toast-close"
+              aria-label="Close notification"
+            >
+              <X size={15} />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="page-header">
         <div>
           <h1 className="page-heading">Academic Departments</h1>
@@ -156,27 +200,24 @@ export const DepartmentsPage = () => {
             Manage academic divisions, department codes, and faculty assignments.
           </p>
         </div>
-        {isAdmin && (
-          <button onClick={handleOpenAdd} className="btn btn-primary">
-            <Plus size={18} />
-            <span>Add Department</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            type="button"
+            onClick={() => fetchDepartments()}
+            className="btn-refresh"
+            title="Refresh departments list"
+          >
+            <RotateCw size={15} />
+            <span>Refresh</span>
           </button>
-        )}
+          {isAdmin && (
+            <button onClick={handleOpenAdd} className="btn btn-primary">
+              <Plus size={18} />
+              <span>Add Department</span>
+            </button>
+          )}
+        </div>
       </div>
-
-      {error && (
-        <div className="alert alert-error">
-          <AlertCircle size={18} />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {success && (
-        <div className="alert alert-success">
-          <CheckCircle2 size={18} />
-          <span>{success}</span>
-        </div>
-      )}
 
       {/* Filter / Search Bar */}
       <div className="filter-card">
@@ -297,6 +338,13 @@ export const DepartmentsPage = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="modal-form">
+              {modalError && (
+                <div className="alert alert-error" style={{ marginBottom: 16 }}>
+                  <AlertCircle size={18} />
+                  <span>{modalError}</span>
+                </div>
+              )}
+
               <div className="form-group">
                 <label>Department Code</label>
                 <input

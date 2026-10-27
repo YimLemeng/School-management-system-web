@@ -20,6 +20,7 @@ import {
   Eye,
   BookOpen,
   Building2,
+  RotateCw,
 } from 'lucide-react';
 
 export const TeachersPage = () => {
@@ -27,8 +28,17 @@ export const TeachersPage = () => {
   const [teachers, setTeachers] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [toast, setToast] = useState(null);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   // Course assignments state
   const [teacherCoursesMap, setTeacherCoursesMap] = useState({});
@@ -45,6 +55,7 @@ export const TeachersPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [modalError, setModalError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [viewingTeacher, setViewingTeacher] = useState(null);
@@ -67,7 +78,6 @@ export const TeachersPage = () => {
 
   const fetchTeachers = async () => {
     setLoading(true);
-    setError('');
     try {
       const res = await teacherApi.getAllTeachers({
         pageNo,
@@ -81,7 +91,11 @@ export const TeachersPage = () => {
         setTotalElements(res.data.totalElements || 0);
       }
     } catch (err) {
-      setError(err.message || 'Failed to load teachers.');
+      setToast({
+        type: 'error',
+        title: 'Failed to load teachers',
+        message: err.message || 'Could not fetch faculty teachers list.',
+      });
     } finally {
       setLoading(false);
     }
@@ -135,10 +149,7 @@ export const TeachersPage = () => {
     setViewCoursesLoading(true);
     setViewCourses([]);
     try {
-      const [res] = await Promise.all([
-        courseApi.getAllCourses({ teacherId: t.id, pageSize: 50 }),
-        new Promise((r) => setTimeout(r, 350)),
-      ]);
+      const res = await courseApi.getAllCourses({ teacherId: t.id, pageSize: 50 });
       const list = res.data?.content || res.data || [];
       setViewCourses(list);
     } catch {
@@ -157,6 +168,7 @@ export const TeachersPage = () => {
   const handleOpenAdd = () => {
     setIsEditing(false);
     setEditingId(null);
+    setModalError('');
     setFormData({
       ...initialForm,
       departmentId: departments[0]?.id || '',
@@ -167,6 +179,7 @@ export const TeachersPage = () => {
   const handleOpenEdit = (t) => {
     setIsEditing(true);
     setEditingId(t.id);
+    setModalError('');
     const deptMatch = departments.find((d) => d.name === t.departmentName);
     setFormData({
       firstName: t.firstName || '',
@@ -186,34 +199,40 @@ export const TeachersPage = () => {
   const handleSubmitTeacher = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    setError('');
-    setSuccess('');
+    setModalError('');
 
     try {
       const payload = {
         ...formData,
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        email: formData.email.trim(),
+        phoneNumber: formData.phoneNumber && formData.phoneNumber.trim() !== '' ? formData.phoneNumber.trim() : null,
+        emergencyPhone: formData.emergencyPhone && formData.emergencyPhone.trim() !== '' ? formData.emergencyPhone.trim() : null,
         departmentId: formData.departmentId ? Number(formData.departmentId) : null,
         yearsOfExperience: formData.yearsOfExperience ? Number(formData.yearsOfExperience) : 0,
       };
 
       if (isEditing) {
-        await Promise.all([
-          teacherApi.updateTeacher(editingId, payload),
-          new Promise((r) => setTimeout(r, 450)),
-        ]);
-        setSuccess('Teacher profile updated successfully!');
+        await teacherApi.updateTeacher(editingId, payload);
+        setToast({
+          type: 'success',
+          title: 'Teacher Profile Updated',
+          message: `${payload.firstName} ${payload.lastName}'s profile has been updated.`,
+        });
       } else {
-        await Promise.all([
-          teacherApi.createTeacher(payload),
-          new Promise((r) => setTimeout(r, 450)),
-        ]);
-        setSuccess('Teacher registered successfully!');
+        await teacherApi.createTeacher(payload);
+        setToast({
+          type: 'success',
+          title: 'Teacher Registered Successfully',
+          message: `${payload.firstName} ${payload.lastName} has been added to faculty.`,
+        });
       }
 
       setShowModal(false);
       fetchTeachers();
     } catch (err) {
-      setError(
+      setModalError(
         err.message ||
           `Failed to ${isEditing ? 'update' : 'create'} teacher (Requires ROLE_ADMIN).`
       );
@@ -223,22 +242,25 @@ export const TeachersPage = () => {
   };
 
   const handleDelete = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete teacher "${name}" (ID: ${id})?`)) {
+    if (!window.confirm(`Are you sure you want to delete teacher "${name}" (ID: #${id})?`)) {
       return;
     }
 
     setDeletingId(id);
-    setError('');
-    setSuccess('');
     try {
-      await Promise.all([
-        teacherApi.deleteTeacher(id),
-        new Promise((r) => setTimeout(r, 450)),
-      ]);
-      setSuccess(`Teacher "${name}" deleted successfully.`);
+      await teacherApi.deleteTeacher(id);
+      setToast({
+        type: 'success',
+        title: 'Teacher Deleted Successfully',
+        message: `Faculty member "${name}" has been removed.`,
+      });
       fetchTeachers();
     } catch (err) {
-      setError(err.message || 'Failed to delete teacher (Requires ROLE_ADMIN).');
+      setToast({
+        type: 'error',
+        title: 'Delete Failed',
+        message: err.message || 'Failed to delete teacher (Requires ROLE_ADMIN).',
+      });
     } finally {
       setDeletingId(null);
     }
@@ -248,6 +270,29 @@ export const TeachersPage = () => {
 
   return (
     <div className="page-content">
+      {/* Floating Modern Toast Notification */}
+      {toast && (
+        <div className="app-toast-container">
+          <div className={`app-toast app-toast-${toast.type}`}>
+            <div className="app-toast-icon-wrap">
+              {toast.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+            </div>
+            <div className="app-toast-content">
+              <h4 className="app-toast-title">{toast.title}</h4>
+              {toast.message && <p className="app-toast-message">{toast.message}</p>}
+            </div>
+            <button
+              type="button"
+              onClick={() => setToast(null)}
+              className="app-toast-close"
+              aria-label="Close notification"
+            >
+              <X size={15} />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="page-header">
         <div>
           <h1 className="page-heading">Instructors & Faculty</h1>
@@ -255,27 +300,24 @@ export const TeachersPage = () => {
             Total {totalElements} academic teachers in the faculty directory.
           </p>
         </div>
-        {canManage && (
-          <button onClick={handleOpenAdd} className="btn btn-primary">
-            <Plus size={18} />
-            <span>Add Teacher</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            type="button"
+            onClick={() => fetchTeachers()}
+            className="btn-refresh"
+            title="Refresh teachers list"
+          >
+            <RotateCw size={15} />
+            <span>Refresh</span>
           </button>
-        )}
+          {canManage && (
+            <button onClick={handleOpenAdd} className="btn btn-primary">
+              <Plus size={18} />
+              <span>Add Teacher</span>
+            </button>
+          )}
+        </div>
       </div>
-
-      {error && (
-        <div className="alert alert-error">
-          <AlertCircle size={18} />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {success && (
-        <div className="alert alert-success">
-          <CheckCircle2 size={18} />
-          <span>{success}</span>
-        </div>
-      )}
 
       {/* Teachers Grid / Table */}
       {loading ? (
@@ -452,6 +494,13 @@ export const TeachersPage = () => {
             </div>
 
             <form onSubmit={handleSubmitTeacher} className="modal-form">
+              {modalError && (
+                <div className="alert alert-error" style={{ marginBottom: 16 }}>
+                  <AlertCircle size={18} />
+                  <span>{modalError}</span>
+                </div>
+              )}
+
               <div className="form-row-2">
                 <div className="form-group">
                   <label>First Name</label>

@@ -41,15 +41,31 @@ axiosClient.interceptors.response.use(
     }
 
     let message = 'An unexpected error occurred';
-    if (error.response && error.response.data) {
+    if (error.response) {
+      const status = error.response.status;
       const data = error.response.data;
-      if (data.message) {
-        message = data.message;
+
+      if (status === 401) {
+        message = data?.message || 'Invalid username/email or password. Please try again.';
+      } else if (status === 403) {
+        message = data?.message || 'You do not have permission to perform this action.';
+      } else if (status === 404) {
+        message = data?.message || 'Requested resource not found.';
+      } else if (status === 502 || status === 503 || status === 504) {
+        message = 'Server is temporarily unavailable or restarting. Please try again in a moment.';
+      } else if (data && typeof data === 'object') {
+        if (data.message) {
+          message = data.message;
+        }
+        if (data.errors && typeof data.errors === 'object') {
+          const fieldErrors = Object.values(data.errors).join(', ');
+          if (fieldErrors) message = `${message}: ${fieldErrors}`;
+        }
+      } else if (error.message) {
+        message = error.message;
       }
-      if (data.errors && typeof data.errors === 'object') {
-        const fieldErrors = Object.values(data.errors).join(', ');
-        if (fieldErrors) message = `${message}: ${fieldErrors}`;
-      }
+    } else if (error.request) {
+      message = 'Cannot connect to backend server. Please check your network or server status.';
     } else if (error.message) {
       message = error.message;
     }

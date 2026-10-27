@@ -3,31 +3,31 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 export const ROUTE_LOADING_CONFIG = {
   '/': {
     title: 'Loading dashboard...',
-    subtitle: 'កំពុងទាញយកទិន្នន័យ Dashboard សូមរង់ចាំ...',
+    subtitle: 'Fetching dashboard analytics, please wait...',
   },
   '/departments': {
     title: 'Loading departments...',
-    subtitle: 'កំពុងទាញយកទិន្នន័យ Departments សូមរង់ចាំ...',
+    subtitle: 'Fetching departments data, please wait...',
   },
   '/students': {
     title: 'Loading students...',
-    subtitle: 'កំពុងទាញយកទិន្នន័យ Students សូមរង់ចាំ...',
+    subtitle: 'Fetching students list, please wait...',
   },
   '/teachers': {
     title: 'Loading teachers...',
-    subtitle: 'កំពុងទាញយកទិន្នន័យ Teachers សូមរង់ចាំ...',
+    subtitle: 'Fetching faculty data, please wait...',
   },
   '/courses': {
     title: 'Loading courses...',
-    subtitle: 'កំពុងទាញយកទិន្នន័យ Courses សូមរង់ចាំ...',
+    subtitle: 'Fetching courses catalog, please wait...',
   },
   '/enrollments': {
     title: 'Loading enrollments...',
-    subtitle: 'កំពុងទាញយកទិន្នន័យ Enrollments សូមរង់ចាំ...',
+    subtitle: 'Fetching enrollments and capacity, please wait...',
   },
   '/profile': {
     title: 'Loading profile...',
-    subtitle: 'កំពុងទាញយកទិន្នន័យ Profile សូមរង់ចាំ...',
+    subtitle: 'Fetching profile information, please wait...',
   },
 };
 
@@ -37,13 +37,13 @@ export const LoadingProvider = ({ children }) => {
   const [loadingState, setLoadingState] = useState({
     isOpen: false,
     title: 'Loading dashboard...',
-    subtitle: 'កំពុងទាញយកទិន្នន័យ Dashboard សូមរង់ចាំ...',
+    subtitle: 'Fetching dashboard analytics, please wait...',
   });
 
   const timerRef = useRef(null);
 
   const showLoading = useCallback(
-    (title = 'Loading...', subtitle = 'កំពុងដំណើរការ សូមរង់ចាំ...') => {
+    (title = 'Loading...', subtitle = 'Processing, please wait...') => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
@@ -66,7 +66,7 @@ export const LoadingProvider = ({ children }) => {
   }, []);
 
   const triggerLoading = useCallback(
-    (title = 'Loading...', subtitle = 'កំពុងដំណើរការ សូមរង់ចាំ...', duration = 500) => {
+    (title = 'Loading...', subtitle = 'Processing, please wait...', duration = 500) => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
@@ -89,7 +89,7 @@ export const LoadingProvider = ({ children }) => {
   const withLoading = useCallback(
     async (action, options = {}) => {
       const title = options.title || 'Loading...';
-      const subtitle = options.subtitle || 'កំពុងដំណើរការ សូមរង់ចាំ...';
+      const subtitle = options.subtitle || 'Processing, please wait...';
       const minDuration = options.minDuration ?? 450;
 
       showLoading(title, subtitle);
@@ -109,71 +109,12 @@ export const LoadingProvider = ({ children }) => {
     [showLoading, hideLoading]
   );
 
-  // Global button click interceptor for action buttons
+  // Clean up timer on unmount
   useEffect(() => {
-    const handleDocumentClick = (e) => {
-      const targetBtn = e.target.closest('button, [data-loading-title]');
-      if (!targetBtn) return;
-
-      // Skip passive controls or modals
-      if (
-        targetBtn.classList.contains('btn-close') ||
-        targetBtn.classList.contains('btn-toggle-eye') ||
-        targetBtn.classList.contains('btn-dismiss') ||
-        targetBtn.classList.contains('btn-icon') ||
-        targetBtn.classList.contains('btn-logout-trigger') ||
-        targetBtn.getAttribute('data-no-loading') === 'true' ||
-        targetBtn.disabled
-      ) {
-        return;
-      }
-
-      // Check explicit data attributes first
-      const explicitTitle = targetBtn.getAttribute('data-loading-title');
-      const explicitSubtitle = targetBtn.getAttribute('data-loading-subtitle');
-      if (explicitTitle) {
-        triggerLoading(
-          explicitTitle,
-          explicitSubtitle || 'កំពុងដំណើរការ សូមរង់ចាំ...',
-          500
-        );
-        return;
-      }
-
-      // Handle common button text / actions
-      const btnText = (targetBtn.innerText || targetBtn.textContent || '').trim();
-      if (!btnText) return;
-
-      if (/sign out|logout/i.test(btnText)) {
-        triggerLoading('Signing out...', 'កំពុងចាកចេញពីប្រព័ន្ធ សូមរង់ចាំ...', 600);
-      } else if (/search|filter/i.test(btnText) && !targetBtn.classList.contains('btn-page')) {
-        triggerLoading('Searching data...', 'កំពុងស្វែងរកទិន្នន័យ សូមរង់ចាំ...', 450);
-      } else if (/add student|save student|new student/i.test(btnText)) {
-        triggerLoading('Processing student...', 'កំពុងដំណើរការទិន្នន័យសិស្ស សូមរង់ចាំ...', 500);
-      } else if (/add teacher|save teacher|new teacher/i.test(btnText)) {
-        triggerLoading('Processing teacher...', 'កំពុងដំណើរការទិន្នន័យគ្រូ សូមរង់ចាំ...', 500);
-      } else if (/add course|save course|new course/i.test(btnText)) {
-        triggerLoading('Processing course...', 'កំពុងដំណើរការទិន្នន័យវគ្គសិក្សា សូមរង់ចាំ...', 500);
-      } else if (/enroll now|enroll in course|confirm enrollment/i.test(btnText)) {
-        triggerLoading('Processing enrollment...', 'កំពុងដំណើរការចុះឈ្មោះ សូមរង់ចាំ...', 600);
-      } else if (/change password|update password/i.test(btnText)) {
-        triggerLoading('Updating password...', 'កំពុងប្តូរលេខសម្ងាត់ សូមរង់ចាំ...', 600);
-      } else if (/delete|remove/i.test(btnText)) {
-        triggerLoading('Deleting record...', 'កំពុងលុបទិន្នន័យ សូមរង់ចាំ...', 500);
-      } else if (
-        targetBtn.classList.contains('btn-primary') &&
-        !targetBtn.classList.contains('btn-page')
-      ) {
-        triggerLoading('Processing...', 'កំពុងដំណើរការ សូមរង់ចាំ...', 450);
-      }
-    };
-
-    document.addEventListener('click', handleDocumentClick);
     return () => {
-      document.removeEventListener('click', handleDocumentClick);
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [triggerLoading]);
+  }, []);
 
   return (
     <LoadingContext.Provider

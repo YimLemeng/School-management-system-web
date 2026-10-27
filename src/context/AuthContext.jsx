@@ -15,6 +15,13 @@ export const AuthProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(true);
 
+  const logout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('currentUser');
+    setToken(null);
+    setUser(null);
+  };
+
   useEffect(() => {
     const verifyUser = async () => {
       if (token) {
@@ -75,13 +82,6 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
 
     return authData;
-  };
-
-  const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('currentUser');
-    setToken(null);
-    setUser(null);
   };
 
   const hasRole = (role) => {

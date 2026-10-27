@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { SchoolLogo } from '../components/SchoolLogo';
@@ -27,10 +27,7 @@ export const LoginPage = () => {
     setLoading(true);
 
     try {
-      await Promise.all([
-        login(usernameOrEmail, password),
-        new Promise((r) => setTimeout(r, 400)),
-      ]);
+      await login(usernameOrEmail, password);
       navigate(from, { replace: true });
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');
@@ -104,6 +101,7 @@ export const LoginPage = () => {
           <button
             type="submit"
             className="btn btn-primary btn-block"
+            data-no-loading="true"
             disabled={loading}
           >
             {loading ? (
@@ -116,15 +114,6 @@ export const LoginPage = () => {
             )}
           </button>
         </form>
-
-        <div className="auth-footer">
-          <p>
-            Don't have an account?{' '}
-            <Link to="/register" replace className="auth-link">
-              Create an account
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   );

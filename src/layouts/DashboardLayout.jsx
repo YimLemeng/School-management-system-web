@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useLoading, ROUTE_LOADING_CONFIG } from '../context/LoadingContext';
 import {
   LayoutDashboard,
   Users,
@@ -13,15 +12,32 @@ import {
   LogOut,
   Menu,
   X,
-  GraduationCap,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 import { SchoolLogo } from '../components/SchoolLogo';
 
 export const DashboardLayout = () => {
   const { user, logout, hasRole } = useAuth();
-  const { triggerLoading } = useLoading();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('school_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleSidebarCollapse = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('school_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   const [loggingOut, setLoggingOut] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -33,8 +49,6 @@ export const DashboardLayout = () => {
   const confirmLogout = async () => {
     setShowLogoutModal(false);
     setLoggingOut(true);
-    triggerLoading('Signing out...', 'កំពុងចាកចេញពីប្រព័ន្ធ សូមរង់ចាំ...', 600);
-    await new Promise((r) => setTimeout(r, 450));
     logout();
     navigate('/login', { replace: true });
     setLoggingOut(false);
@@ -74,29 +88,46 @@ export const DashboardLayout = () => {
         </button>
       </header>
 
-      {/* Sidebar */}
-      <aside className={`app-sidebar ${sidebarOpen ? 'open' : ''}`}>
+      {/* Sidebar with Desktop Collapse Toggle */}
+      <aside className={`app-sidebar ${sidebarOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-brand">
-          <div className="brand-icon-wrapper" style={{ padding: 0, background: 'transparent' }}>
-            <SchoolLogo size={44} />
+          <div className="brand-logo-content">
+            <div className="brand-icon-wrapper" style={{ padding: 0, background: 'transparent' }}>
+              <SchoolLogo size={isCollapsed ? 34 : 44} />
+            </div>
+            {!isCollapsed && (
+              <div className="brand-text">
+                <h1 className="brand-title">School MS</h1>
+                <p className="brand-subtitle">Management System</p>
+              </div>
+            )}
           </div>
-          <div>
-            <h1 className="brand-title">School MS</h1>
-            <p className="brand-subtitle">Management System</p>
-          </div>
+
+          {/* Toggle Button for Open/Close Desktop Sidebar */}
+          <button
+            type="button"
+            onClick={toggleSidebarCollapse}
+            className="sidebar-collapse-btn"
+            title={isCollapsed ? 'Open / Expand Sidebar' : 'Close / Collapse Sidebar'}
+            aria-label="Toggle Sidebar"
+          >
+            {isCollapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
+          </button>
         </div>
 
         {/* User Card */}
-        <div className="sidebar-user-card">
+        <div className="sidebar-user-card" title={isCollapsed ? `${user?.fullName || user?.username} (${primaryRole})` : undefined}>
           <div className="user-avatar">
             {user?.username?.substring(0, 2).toUpperCase() || 'US'}
           </div>
-          <div className="user-info">
-            <p className="user-name">{user?.fullName || user?.username}</p>
-            <span className={`badge-role role-${primaryRole.toLowerCase()}`}>
-              {primaryRole}
-            </span>
-          </div>
+          {!isCollapsed && (
+            <div className="user-info">
+              <p className="user-name">{user?.fullName || user?.username}</p>
+              <span className={`badge-role role-${primaryRole.toLowerCase()}`}>
+                {primaryRole}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Navigation links */}
@@ -108,12 +139,9 @@ export const DashboardLayout = () => {
                 key={item.path}
                 to={item.path}
                 end={item.path === '/'}
+                title={item.name}
                 onClick={() => {
                   setSidebarOpen(false);
-                  const config = ROUTE_LOADING_CONFIG[item.path];
-                  if (config) {
-                    triggerLoading(config.title, config.subtitle, 450);
-                  }
                 }}
                 className={({ isActive }) =>
                   `nav-link ${isActive ? 'active' : ''}`
@@ -122,8 +150,8 @@ export const DashboardLayout = () => {
                 <div className="nav-icon-box">
                   <Icon size={19} className="nav-icon" />
                 </div>
-                <span className="nav-text">{item.name}</span>
-                <span className="nav-active-pill" />
+                {!isCollapsed && <span className="nav-text">{item.name}</span>}
+                {!isCollapsed && <span className="nav-active-pill" />}
               </NavLink>
             );
           })}
@@ -137,16 +165,17 @@ export const DashboardLayout = () => {
             className="btn-logout btn-logout-trigger"
             data-no-loading="true"
             disabled={loggingOut}
+            title={isCollapsed ? 'Sign Out' : undefined}
           >
             {loggingOut ? (
               <>
                 <span className="btn-spinner" style={{ width: 14, height: 14 }}></span>
-                <span>Signing Out...</span>
+                {!isCollapsed && <span>Signing Out...</span>}
               </>
             ) : (
               <>
                 <LogOut size={18} />
-                <span>Sign Out</span>
+                {!isCollapsed && <span>Sign Out</span>}
               </>
             )}
           </button>
@@ -154,7 +183,7 @@ export const DashboardLayout = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="app-main-content">
+      <main className={`app-main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <div className="content-inner">
           <Outlet />
         </div>
@@ -168,7 +197,7 @@ export const DashboardLayout = () => {
         />
       )}
 
-      {/* Sign Out Confirmation Modal (Matches user mockup 100%) */}
+      {/* Sign Out Confirmation Modal */}
       {showLogoutModal && (
         <div
           className="signout-modal-backdrop"

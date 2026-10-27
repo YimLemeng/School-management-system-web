@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../api/authApi';
-import { Lock, Mail, User, AlertCircle, Eye, EyeOff, Shield } from 'lucide-react';
+import { Lock, Mail, User, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { SchoolLogo } from '../components/SchoolLogo';
 
 export const RegisterPage = () => {
@@ -41,10 +41,7 @@ export const RegisterPage = () => {
         ...formData,
         roles: ['ROLE_STUDENT'],
       };
-      await Promise.all([
-        authApi.register(payload),
-        new Promise((r) => setTimeout(r, 400)),
-      ]);
+      await authApi.register(payload);
       navigate('/login', {
         replace: true,
         state: {
@@ -133,6 +130,14 @@ export const RegisterPage = () => {
                   onChange={handleChange}
                   required
                 />
+                <button
+                  type="button"
+                  className="btn-toggle-eye"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 
@@ -148,6 +153,14 @@ export const RegisterPage = () => {
                   onChange={handleChange}
                   required
                 />
+                <button
+                  type="button"
+                  className="btn-toggle-eye"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
           </div>
@@ -155,6 +168,7 @@ export const RegisterPage = () => {
           <button
             type="submit"
             className="btn btn-primary btn-block"
+            data-no-loading="true"
             disabled={loading}
           >
             {loading ? (

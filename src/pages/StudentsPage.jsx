@@ -20,6 +20,7 @@ import {
   Calendar,
   GraduationCap,
   BookOpen,
+  RotateCw,
 } from 'lucide-react';
 
 export const StudentsPage = () => {
@@ -30,8 +31,17 @@ export const StudentsPage = () => {
 
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [toast, setToast] = useState(null);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   // Pagination & Filter state
   const [search, setSearch] = useState('');
@@ -45,6 +55,7 @@ export const StudentsPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [modalError, setModalError] = useState('');
 
   const initialForm = {
     firstName: '',
@@ -67,7 +78,6 @@ export const StudentsPage = () => {
 
   const fetchStudents = async () => {
     setLoading(true);
-    setError('');
     try {
       const params = {
         pageNo,
@@ -85,7 +95,11 @@ export const StudentsPage = () => {
         setTotalElements(res.data.totalElements || 0);
       }
     } catch (err) {
-      setError(err.message || 'Failed to fetch students.');
+      setToast({
+        type: 'error',
+        title: 'Failed to load students',
+        message: err.message || 'Could not fetch students list.',
+      });
     } finally {
       setLoading(false);
     }
@@ -109,6 +123,7 @@ export const StudentsPage = () => {
   const handleOpenAdd = () => {
     setIsEditing(false);
     setEditingId(null);
+    setModalError('');
     setFormData(initialForm);
     setShowModal(true);
   };
@@ -116,6 +131,7 @@ export const StudentsPage = () => {
   const handleOpenEdit = (st) => {
     setIsEditing(true);
     setEditingId(st.id);
+    setModalError('');
     setFormData({
       firstName: st.firstName || '',
       lastName: st.lastName || '',
@@ -130,50 +146,63 @@ export const StudentsPage = () => {
   const handleSubmitStudent = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    setError('');
-    setSuccess('');
+    setModalError('');
 
     try {
+      const payload = {
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        email: formData.email.trim(),
+        phoneNumber: formData.phoneNumber && formData.phoneNumber.trim() !== '' ? formData.phoneNumber.trim() : null,
+        dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth : null,
+        gender: formData.gender,
+      };
+
       if (isEditing) {
-        await Promise.all([
-          studentApi.updateStudent(editingId, formData),
-          new Promise((r) => setTimeout(r, 450)),
-        ]);
-        setSuccess('Student information updated successfully!');
+        await studentApi.updateStudent(editingId, payload);
+        setToast({
+          type: 'success',
+          title: 'Student Updated Successfully',
+          message: `${payload.firstName} ${payload.lastName}'s information has been updated.`,
+        });
       } else {
-        await Promise.all([
-          studentApi.createStudent(formData),
-          new Promise((r) => setTimeout(r, 450)),
-        ]);
-        setSuccess('Student created successfully!');
+        await studentApi.createStudent(payload);
+        setToast({
+          type: 'success',
+          title: 'Student Created Successfully',
+          message: `${payload.firstName} ${payload.lastName} has been registered.`,
+        });
       }
       setShowModal(false);
       setFormData(initialForm);
       fetchStudents();
     } catch (err) {
-      setError(err.message || `Failed to ${isEditing ? 'update' : 'create'} student.`);
+      setModalError(err.message || `Failed to ${isEditing ? 'update' : 'create'} student.`);
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete student "${name}" (ID: ${id})?`)) {
+    if (!window.confirm(`Are you sure you want to delete student "${name}" (ID: #${id})?`)) {
       return;
     }
 
     setDeletingId(id);
-    setError('');
-    setSuccess('');
     try {
-      await Promise.all([
-        studentApi.deleteStudent(id),
-        new Promise((r) => setTimeout(r, 450)),
-      ]);
-      setSuccess(`Student "${name}" deleted successfully.`);
+      await studentApi.deleteStudent(id);
+      setToast({
+        type: 'success',
+        title: 'Student Deleted Successfully',
+        message: `Student "${name}" has been removed.`,
+      });
       fetchStudents();
     } catch (err) {
-      setError(err.message || 'Failed to delete student (Requires ROLE_ADMIN).');
+      setToast({
+        type: 'error',
+        title: 'Delete Failed',
+        message: err.message || 'Failed to delete student (Requires ROLE_ADMIN).',
+      });
     } finally {
       setDeletingId(null);
     }
@@ -185,10 +214,7 @@ export const StudentsPage = () => {
     setViewLoading(true);
     setViewEnrollments([]);
     try {
-      const [res] = await Promise.all([
-        enrollmentApi.getEnrollmentsByStudent(st.id),
-        new Promise((r) => setTimeout(r, 350)),
-      ]);
+      const res = await enrollmentApi.getEnrollmentsByStudent(st.id);
       setViewEnrollments(res.data || []);
     } catch {
       setViewEnrollments([]);
@@ -200,6 +226,29 @@ export const StudentsPage = () => {
 
   return (
     <div className="page-content">
+      {/* Floating Modern Toast Notification */}
+      {toast && (
+        <div className="app-toast-container">
+          <div className={`app-toast app-toast-${toast.type}`}>
+            <div className="app-toast-icon-wrap">
+              {toast.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+            </div>
+            <div className="app-toast-content">
+              <h4 className="app-toast-title">{toast.title}</h4>
+              {toast.message && <p className="app-toast-message">{toast.message}</p>}
+            </div>
+            <button
+              type="button"
+              onClick={() => setToast(null)}
+              className="app-toast-close"
+              aria-label="Close notification"
+            >
+              <X size={15} />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="page-header">
         <div>
           <h1 className="page-heading">Students Management</h1>
@@ -207,30 +256,27 @@ export const StudentsPage = () => {
             Total {totalElements} registered students in the system.
           </p>
         </div>
-        {canManage && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
-            onClick={handleOpenAdd}
-            className="btn btn-primary"
+            type="button"
+            onClick={() => fetchStudents()}
+            className="btn-refresh"
+            title="Refresh students list"
           >
-            <Plus size={18} />
-            <span>Add Student</span>
+            <RotateCw size={15} />
+            <span>Refresh</span>
           </button>
-        )}
+          {canManage && (
+            <button
+              onClick={handleOpenAdd}
+              className="btn btn-primary"
+            >
+              <Plus size={18} />
+              <span>Add Student</span>
+            </button>
+          )}
+        </div>
       </div>
-
-      {error && (
-        <div className="alert alert-error">
-          <AlertCircle size={18} />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {success && (
-        <div className="alert alert-success">
-          <CheckCircle2 size={18} />
-          <span>{success}</span>
-        </div>
-      )}
 
       {/* Filter and Search Bar */}
       <div className="filter-card">
@@ -424,6 +470,13 @@ export const StudentsPage = () => {
             </div>
 
             <form onSubmit={handleSubmitStudent} className="modal-form">
+              {modalError && (
+                <div className="alert alert-error" style={{ marginBottom: 16 }}>
+                  <AlertCircle size={18} />
+                  <span>{modalError}</span>
+                </div>
+              )}
+
               <div className="form-row-2">
                 <div className="form-group">
                   <label>First Name</label>
@@ -502,6 +555,7 @@ export const StudentsPage = () => {
                   type="button"
                   onClick={() => setShowModal(false)}
                   className="btn btn-secondary"
+                  disabled={submitting}
                 >
                   Cancel
                 </button>

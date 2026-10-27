@@ -1,25 +1,19 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useLoading, ROUTE_LOADING_CONFIG } from '../context/LoadingContext';
 
+/**
+ * RouteLoadingWatcher - Kept lightweight for route transition tracking without
+ * intrusive full-screen blocking modals.
+ */
 export const RouteLoadingWatcher = () => {
   const location = useLocation();
-  const { triggerLoading } = useLoading();
   const prevPathRef = useRef(null);
 
   useEffect(() => {
-    const currentPath = location.pathname;
-
-    if (prevPathRef.current !== currentPath) {
-      const config = ROUTE_LOADING_CONFIG[currentPath];
-      if (config) {
-        triggerLoading(config.title, config.subtitle, 450);
-      } else {
-        triggerLoading('Loading page...', 'កំពុងដំណើរការ សូមរង់ចាំ...', 400);
-      }
-      prevPathRef.current = currentPath;
-    }
-  }, [location.pathname, triggerLoading]);
+    prevPathRef.current = location.pathname;
+    // Scroll to top on route change
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [location.pathname]);
 
   return null;
 };

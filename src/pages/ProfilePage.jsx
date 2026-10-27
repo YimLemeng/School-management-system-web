@@ -14,8 +14,7 @@ import {
 
 export const ProfilePage = () => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(user);
 
   const [passData, setPassData] = useState({
     currentPassword: '',
@@ -30,17 +29,17 @@ export const ProfilePage = () => {
     const fetchProfile = async () => {
       try {
         const res = await authApi.getMe();
-        setProfile(res.data);
-      } catch (err) {
+        if (res.data) {
+          setProfile(res.data);
+        }
+      } catch {
         // Fallback to context user
         setProfile(user);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchProfile();
-  }, []);
+  }, [user]);
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
@@ -60,10 +59,7 @@ export const ProfilePage = () => {
     setPassLoading(true);
 
     try {
-      await Promise.all([
-        authApi.changePassword(passData),
-        new Promise((r) => setTimeout(r, 450)),
-      ]);
+      await authApi.changePassword(passData);
       setPassSuccess('Password changed successfully! You can use your new password next time.');
       setPassData({
         currentPassword: '',

@@ -12,6 +12,7 @@ import {
   Plus,
   X,
   ArrowRight,
+  RotateCw,
 } from 'lucide-react';
 
 export const CoursesPage = () => {
@@ -20,8 +21,18 @@ export const CoursesPage = () => {
 
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [toast, setToast] = useState(null);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   const [deletingId, setDeletingId] = useState(null);
 
   const [search, setSearch] = useState('');
@@ -29,6 +40,7 @@ export const CoursesPage = () => {
   const [availableOnly, setAvailableOnly] = useState(false);
 
   const [showAddModal, setShowAddModal] = useState(false);
+  const [modalError, setModalError] = useState('');
   const [submittingCourse, setSubmittingCourse] = useState(false);
   const initialCourseForm = {
     title: '',
@@ -42,7 +54,6 @@ export const CoursesPage = () => {
 
   const fetchCourses = async () => {
     setLoading(true);
-    setError('');
     try {
       const params = {
         pageNo: 0,
@@ -57,7 +68,11 @@ export const CoursesPage = () => {
         setCourses(res.data.content || []);
       }
     } catch (err) {
-      setError(err.message || 'Failed to load courses.');
+      setToast({
+        type: 'error',
+        title: 'Failed to load courses',
+        message: err.message || 'Could not fetch courses list.',
+      });
     } finally {
       setLoading(false);
     }
@@ -73,22 +88,25 @@ export const CoursesPage = () => {
   };
 
   const handleDeleteCourse = async (id, title) => {
-    if (!window.confirm(`Are you sure you want to delete course "${title}" (ID: ${id})?`)) {
+    if (!window.confirm(`Are you sure you want to delete course "${title}" (ID: #${id})?`)) {
       return;
     }
 
     setDeletingId(id);
-    setError('');
-    setSuccess('');
     try {
-      await Promise.all([
-        courseApi.deleteCourse(id),
-        new Promise((r) => setTimeout(r, 450)),
-      ]);
-      setSuccess(`Course "${title}" deleted successfully.`);
+      await courseApi.deleteCourse(id);
+      setToast({
+        type: 'success',
+        title: 'Course Deleted Successfully',
+        message: `Course "${title}" has been removed.`,
+      });
       fetchCourses();
     } catch (err) {
-      setError(err.message || 'Failed to delete course.');
+      setToast({
+        type: 'error',
+        title: 'Delete Failed',
+        message: err.message || 'Failed to delete course.',
+      });
     } finally {
       setDeletingId(null);
     }
@@ -102,8 +120,7 @@ export const CoursesPage = () => {
   const handleCreateCourse = async (e) => {
     e.preventDefault();
     setSubmittingCourse(true);
-    setError('');
-    setSuccess('');
+    setModalError('');
 
     try {
       const payload = {
@@ -115,16 +132,17 @@ export const CoursesPage = () => {
         capacity: Number(courseFormData.capacity),
       };
 
-      await Promise.all([
-        courseApi.createCourse(payload),
-        new Promise((r) => setTimeout(r, 450)),
-      ]);
-      setSuccess('Course created successfully!');
+      await courseApi.createCourse(payload);
+      setToast({
+        type: 'success',
+        title: 'Course Created Successfully',
+        message: `Course "${payload.code} - ${payload.title}" has been registered.`,
+      });
       setShowAddModal(false);
       setCourseFormData(initialCourseForm);
       fetchCourses();
     } catch (err) {
-      setError(err.message || 'Failed to create course.');
+      setModalError(err.message || 'Failed to create course.');
     } finally {
       setSubmittingCourse(false);
     }
@@ -132,6 +150,29 @@ export const CoursesPage = () => {
 
   return (
     <div className="page-content">
+      {/* Floating Modern Toast Notification */}
+      {toast && (
+        <div className="app-toast-container">
+          <div className={`app-toast app-toast-${toast.type}`}>
+            <div className="app-toast-icon-wrap">
+              {toast.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+            </div>
+            <div className="app-toast-content">
+              <h4 className="app-toast-title">{toast.title}</h4>
+              {toast.message && <p className="app-toast-message">{toast.message}</p>}
+            </div>
+            <button
+              type="button"
+              onClick={() => setToast(null)}
+              className="app-toast-close"
+              aria-label="Close notification"
+            >
+              <X size={15} />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="page-header">
         <div>
           <h1 className="page-heading">Courses & Curriculum</h1>
@@ -139,33 +180,31 @@ export const CoursesPage = () => {
             Browse active courses, track real-time available seats, and fees.
           </p>
         </div>
-        {isAdmin && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
-            onClick={() => {
-              setCourseFormData(initialCourseForm);
-              setShowAddModal(true);
-            }}
-            className="btn btn-primary"
+            type="button"
+            onClick={() => fetchCourses()}
+            className="btn-refresh"
+            title="Refresh courses list"
           >
-            <Plus size={18} />
-            <span>Add Course</span>
+            <RotateCw size={15} />
+            <span>Refresh</span>
           </button>
-        )}
+          {isAdmin && (
+            <button
+              onClick={() => {
+                setModalError('');
+                setCourseFormData(initialCourseForm);
+                setShowAddModal(true);
+              }}
+              className="btn btn-primary"
+            >
+              <Plus size={18} />
+              <span>Add Course</span>
+            </button>
+          )}
+        </div>
       </div>
-
-      {error && (
-        <div className="alert alert-error">
-          <AlertCircle size={18} />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {success && (
-        <div className="alert alert-success">
-          <CheckCircle2 size={18} />
-          <span>{success}</span>
-        </div>
-      )}
 
       {/* Filter Bar */}
       <div className="filter-card">
@@ -336,6 +375,13 @@ export const CoursesPage = () => {
             </div>
 
             <form onSubmit={handleCreateCourse} className="modal-form">
+              {modalError && (
+                <div className="alert alert-error" style={{ marginBottom: 16 }}>
+                  <AlertCircle size={18} />
+                  <span>{modalError}</span>
+                </div>
+              )}
+
               <div className="form-row-2">
                 <div className="form-group">
                   <label>Course Code</label>
