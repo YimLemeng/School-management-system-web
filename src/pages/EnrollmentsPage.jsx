@@ -274,7 +274,6 @@ export const EnrollmentsPage = () => {
     setRefreshing(true);
     try {
       await Promise.allSettled([refreshCourses(), fetchAllEnrollments()]);
-      setToast({ type: 'success', title: 'Form reset and data refreshed' });
     } finally {
       setTimeout(() => setRefreshing(false), 350);
     }
