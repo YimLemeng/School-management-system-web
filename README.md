@@ -1,6 +1,8 @@
 # School Management System - Frontend (React + Vite)
 
-A modern, responsive, and secure frontend application built with **React (Vite)**, **React Router**, and **Axios**, designed to connect directly with the **Spring Boot 3 School Management System REST API**.
+A modern, responsive, and secure frontend application built with **React (Vite)**, **React Router**, and **Axios**, designed to connect directly with the **[Spring Boot 3 School Management System REST API](https://github.com/YimLemeng/School-management-system)**.
+
+> 🔗 **Backend API Repository**: [https://github.com/YimLemeng/School-management-system](https://github.com/YimLemeng/School-management-system)
 
 ---
 
@@ -32,6 +34,7 @@ A modern, responsive, and secure frontend application built with **React (Vite)*
 ## 🛠️ How to Run
 
 1. **Ensure Backend is running**:
+   - Clone and start the backend from the [School Management System Backend Repository](https://github.com/YimLemeng/School-management-system).
    - Backend should be running on `http://localhost:8080`.
 
 2. **Start the Frontend**:
