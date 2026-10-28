@@ -185,7 +185,7 @@ export const EnrollmentsPage = () => {
       const payload = {
         studentId: effectiveStudentId,
         courseId: Number(courseId),
-        discountPercentage: discountPercentage ? Number(discountPercentage) : 0,
+        discountPercentage: isStudent ? 0 : (discountPercentage ? Number(discountPercentage) : 0),
         status: enrollmentStatus,
         notes: notes || undefined,
       };
@@ -292,7 +292,7 @@ export const EnrollmentsPage = () => {
   const selectedCourse = courses.find((c) => c.id.toString() === courseId);
 
   const originalFee = selectedCourse ? Number(selectedCourse.fee) : 0;
-  const discountVal = (originalFee * (Number(discountPercentage) || 0)) / 100;
+  const discountVal = isStudent ? 0 : (originalFee * (Number(discountPercentage) || 0)) / 100;
   const calculatedFinalFee = Math.max(0, originalFee - discountVal);
 
   const pendingCount = allEnrollments.filter((e) => e.status === 'PENDING').length;
@@ -447,25 +447,27 @@ export const EnrollmentsPage = () => {
               </select>
             </div>
 
-            {/* Discount Field */}
-            <div className="form-group">
-              <label>Discount Percentage (%)</label>
-              <div className="input-with-icon">
-                <Percent size={18} className="input-icon" />
-                <input
-                  type="number"
-                  placeholder="0 (e.g. 10)"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={discountPercentage}
-                  onChange={(e) => setDiscountPercentage(e.target.value)}
-                />
+            {/* Discount Field - Only for Admin / Staff (Hidden for Students) */}
+            {!isStudent && (
+              <div className="form-group">
+                <label>Discount Percentage (%)</label>
+                <div className="input-with-icon">
+                  <Percent size={18} className="input-icon" />
+                  <input
+                    type="number"
+                    placeholder="0 (e.g. 10)"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={discountPercentage}
+                    onChange={(e) => setDiscountPercentage(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Note (Spanning 2 columns) */}
-            <div className="form-group col-span-2">
+            {/* Note */}
+            <div className={`form-group ${isStudent ? '' : 'col-span-2'}`}>
               <label>Note</label>
               <input
                 type="text"
@@ -483,12 +485,14 @@ export const EnrollmentsPage = () => {
                 <span className="price-item-label">Original Fee</span>
                 <span className="price-item-value">${originalFee.toFixed(2)}</span>
               </div>
-              <div className="price-item">
-                <span className="price-item-label">Discount Applied</span>
-                <span className="price-item-value discount">
-                  -${discountVal.toFixed(2)} ({discountPercentage || 0}%)
-                </span>
-              </div>
+              {!isStudent && (
+                <div className="price-item">
+                  <span className="price-item-label">Discount Applied</span>
+                  <span className="price-item-value discount">
+                    -${discountVal.toFixed(2)} ({discountPercentage || 0}%)
+                  </span>
+                </div>
+              )}
               <div className="price-item price-item-total">
                 <span className="price-item-label">Final Payable Fee</span>
                 <span className="price-final-bold">${calculatedFinalFee.toFixed(2)}</span>
