@@ -52,7 +52,7 @@ A modern, responsive, and secure frontend application built with **React (Vite)*
 | :--- | :--- | :--- | :--- |
 | **Admin** | `admin` / `admin@school.edu.kh` | `admin123` | Full access (Departments, Teachers, Students, Courses, Confirm/Cancel Enrollments) |
 | **Teacher** | `teacher` / `teacher@school.edu.kh` | `teacher123` | Add/edit students, view courses, confirm enrollments |
-| **Student** | `student` / `student@school.edu.kh` | `student123` | Browse departments & courses, self-enroll in courses, view profile |
+| **Student** | `student` / `student@school.edu.kh` | `student123` | Browse courses, self-enroll in courses, view profile |
 
 ---
 
