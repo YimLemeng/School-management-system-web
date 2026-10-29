@@ -120,7 +120,7 @@ export const LoginPage = () => {
           <p style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, textAlign: 'center', marginBottom: '10px' }}>
             ⚡ One-Click Demo Accounts
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
             <button
               type="button"
               onClick={() => {
@@ -169,31 +169,6 @@ export const LoginPage = () => {
             >
               <span>👨‍🏫 Teacher</span>
               <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 400 }}>teacher123</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setUsernameOrEmail('student');
-                setPassword('student123');
-              }}
-              style={{
-                background: '#f8fafc',
-                border: '1px solid #cbd5e1',
-                borderRadius: '8px',
-                padding: '8px 4px',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                color: '#1e293b',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '2px',
-              }}
-            >
-              <span>🎓 Student</span>
-              <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 400 }}>student123</span>
             </button>
           </div>
         </div>

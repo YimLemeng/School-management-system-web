@@ -3,7 +3,6 @@
 A modern, responsive, and secure frontend application built with **React (Vite)**, **React Router**, and **Axios**, designed to connect directly with the **[Spring Boot 3 School Management System REST API](https://github.com/YimLemeng/School-management-system)**.
 
 > 🌐 **Live Demo Application**: [https://school-management-system-web.yimlemeng.workers.dev](https://school-management-system-web.yimlemeng.workers.dev)  
-> ⚙️ **Live Backend API**: [https://lemeng-school-api.duckdns.org/api/v1](https://lemeng-school-api.duckdns.org/api/v1)  
 > 🔗 **Backend API Repository**: [https://github.com/YimLemeng/School-management-system](https://github.com/YimLemeng/School-management-system)
 
 ---
@@ -14,7 +13,6 @@ A modern, responsive, and secure frontend application built with **React (Vite)*
 | :--- | :--- | :--- | :--- |
 | **Admin** | `admin` / `admin@school.edu.kh` | `admin123` | Full access (Departments, Teachers, Students, Courses, Confirm/Cancel Enrollments) |
 | **Teacher** | `teacher` / `teacher@school.edu.kh` | `teacher123` | Add/edit students, view courses, confirm enrollments |
-| **Student** | `student` / `student@school.edu.kh` | `student123` | Browse courses, self-enroll in courses, view profile |
 
 ---
 
@@ -67,7 +65,6 @@ A modern, responsive, and secure frontend application built with **React (Vite)*
 | :--- | :--- | :--- | :--- |
 | **Admin** | `admin` / `admin@school.edu.kh` | `admin123` | Full access (Departments, Teachers, Students, Courses, Confirm/Cancel Enrollments) |
 | **Teacher** | `teacher` / `teacher@school.edu.kh` | `teacher123` | Add/edit students, view courses, confirm enrollments |
-| **Student** | `student` / `student@school.edu.kh` | `student123` | Browse courses, self-enroll in courses, view profile |
 
 ---
 
