@@ -59,15 +59,6 @@ A modern, responsive, and secure frontend application built with **React (Vite)*
 
 ---
 
-## 🔑 Demo Accounts (Pre-seeded in Backend)
-
-| Role | Username / Email | Password | Allowed Permissions |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin` / `admin@school.edu.kh` | `admin123` | Full access (Departments, Teachers, Students, Courses, Confirm/Cancel Enrollments) |
-| **Teacher** | `teacher` / `teacher@school.edu.kh` | `teacher123` | Add/edit students, view courses, confirm enrollments |
-
----
-
 ## 📁 Project Structure
 
 ```
