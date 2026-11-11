@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { departmentApi } from '../api/departmentApi';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   Building2,
   Plus,
@@ -16,6 +17,7 @@ import {
 
 export const DepartmentsPage = () => {
   const { hasRole } = useAuth();
+  const { t } = useLanguage();
   const isAdmin = hasRole('ADMIN');
 
   const [departments, setDepartments] = useState([]);
@@ -195,10 +197,8 @@ export const DepartmentsPage = () => {
 
       <div className="page-header">
         <div>
-          <h1 className="page-heading">Academic Departments</h1>
-          <p className="page-subheading">
-            Manage academic divisions, department codes, and faculty assignments.
-          </p>
+          <h1 className="page-heading">{t('departments.title')}</h1>
+          <p className="page-subheading">{t('departments.subtitle')}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
@@ -207,13 +207,13 @@ export const DepartmentsPage = () => {
             className="btn-refresh"
             title="Refresh departments list"
           >
-            <RotateCw size={15} />
-            <span>Refresh</span>
+            <RotateCw size={17} />
+            <span>{t('common.refresh')}</span>
           </button>
           {isAdmin && (
             <button onClick={handleOpenAdd} className="btn btn-primary">
               <Plus size={18} />
-              <span>Add Department</span>
+              <span>{t('departments.addDepartment')}</span>
             </button>
           )}
         </div>
@@ -226,7 +226,7 @@ export const DepartmentsPage = () => {
             <Search size={18} className="input-icon" />
             <input
               type="text"
-              placeholder="Search by department name or code (e.g. Computer Science, CS)..."
+              placeholder={t('common.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -238,17 +238,13 @@ export const DepartmentsPage = () => {
       {loading ? (
         <div className="table-loading">
           <div className="spinner"></div>
-          <p>Loading departments...</p>
+          <p>{t('common.loading')}</p>
         </div>
       ) : filteredDepartments.length === 0 ? (
         <div className="empty-state">
           <Building2 size={48} className="empty-icon" />
-          <h3>No Departments Found</h3>
-          <p>
-            {search
-              ? 'No department matched your search query.'
-              : 'Click "Add Department" to register your first department.'}
-          </p>
+          <h3>{t('common.noData')}</h3>
+          <p>{t('departments.subtitle')}</p>
         </div>
       ) : (
         <div className="table-card">
@@ -256,12 +252,12 @@ export const DepartmentsPage = () => {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Code</th>
-                  <th>Department Name</th>
-                  <th>Total Teachers</th>
-                  <th>Description</th>
-                  {isAdmin && <th>Actions</th>}
+                  <th>#ID</th>
+                  <th>{t('departments.deptCode')}</th>
+                  <th>{t('departments.deptName')}</th>
+                  <th>{t('teachers.title')}</th>
+                  <th>{t('departments.description')}</th>
+                  {isAdmin && <th>{t('common.actions')}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -277,7 +273,7 @@ export const DepartmentsPage = () => {
                     <td>
                       <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-700">
                         <Users size={15} className="text-gray-400" />
-                        <span>{dept.totalTeacher ?? 0} Faculty</span>
+                        <span>{dept.totalTeacher ?? 0}</span>
                       </span>
                     </td>
                     <td className="text-gray-500 text-sm max-w-xs truncate">
@@ -289,7 +285,7 @@ export const DepartmentsPage = () => {
                           <button
                             onClick={() => handleOpenEdit(dept)}
                             className="btn-action-edit"
-                            title="Edit Department"
+                            title={t('departments.editDepartment')}
                           >
                             <Pencil size={16} />
                           </button>
@@ -297,7 +293,7 @@ export const DepartmentsPage = () => {
                             onClick={() => handleDelete(dept.id, dept.name)}
                             className="btn-action-delete"
                             disabled={deletingId === dept.id}
-                            title="Delete Department"
+                            title={t('common.delete')}
                           >
                             {deletingId === dept.id ? (
                               <span
@@ -326,7 +322,7 @@ export const DepartmentsPage = () => {
             <div className="modal-header">
               <div className="flex items-center gap-2">
                 <Building2 className="text-indigo-600" size={22} />
-                <h3>{isEditing ? 'Edit Department' : 'Add New Department'}</h3>
+                <h3>{isEditing ? t('departments.editDepartment') : t('departments.addDepartment')}</h3>
               </div>
               <button
                 type="button"
@@ -346,7 +342,7 @@ export const DepartmentsPage = () => {
               )}
 
               <div className="form-group">
-                <label>Department Code</label>
+                <label>{t('departments.deptCode')}</label>
                 <input
                   type="text"
                   name="code"
@@ -360,7 +356,7 @@ export const DepartmentsPage = () => {
               </div>
 
               <div className="form-group">
-                <label>Department Name</label>
+                <label>{t('departments.deptName')}</label>
                 <input
                   type="text"
                   name="name"
@@ -373,7 +369,7 @@ export const DepartmentsPage = () => {
               </div>
 
               <div className="form-group">
-                <label>Description</label>
+                <label>{t('departments.description')}</label>
                 <input
                   type="text"
                   name="description"
@@ -390,7 +386,7 @@ export const DepartmentsPage = () => {
                   className="btn btn-secondary"
                   disabled={submitting}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -400,12 +396,12 @@ export const DepartmentsPage = () => {
                   {submitting ? (
                     <>
                       <span className="btn-spinner"></span>
-                      <span>{isEditing ? 'Updating...' : 'Creating...'}</span>
+                      <span>{t('common.saving')}</span>
                     </>
                   ) : isEditing ? (
-                    'Update Department'
+                    t('common.save')
                   ) : (
-                    'Create Department'
+                    t('departments.addDepartment')
                   )}
                 </button>
               </div>

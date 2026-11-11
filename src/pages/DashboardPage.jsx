@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { studentApi } from '../api/studentApi';
 import { courseApi } from '../api/courseApi';
 import { teacherApi } from '../api/teacherApi';
@@ -10,15 +11,13 @@ import {
   Briefcase,
   BookOpen,
   UserCheck,
-  ShieldCheck,
   ArrowRight,
-  Sparkles,
   RotateCw,
 } from 'lucide-react';
 
 export const DashboardPage = () => {
   const { user, hasRole } = useAuth();
-  const navigate = useNavigate();
+  const { t } = useLanguage();
   const isAdmin = hasRole('ADMIN');
   const isTeacher = hasRole('TEACHER');
 
@@ -101,29 +100,18 @@ export const DashboardPage = () => {
     fetchTopCourses();
   }, [isAdmin]);
 
-  const handleNavigate = (path) => {
-    navigate(path);
-  };
-
-  const primaryRole = user?.roles?.[0]?.replace('ROLE_', '') || 'USER';
-
   return (
     <div className="page-content">
       {/* Welcome Banner */}
       <div className="dashboard-hero">
         <div className="hero-text">
-          <div className="hero-badge">
-            <Sparkles size={14} />
-            <span>School Management Workspace</span>
-          </div>
-          <h1>Welcome, {user?.fullName || user?.username}!</h1>
+          <h1>{t('dashboard.welcome')}, {user?.fullName || user?.username}!</h1>
           <p>
-            {isAdmin &&
-              'School Administration Portal — Manage academic departments, faculty teachers, students, courses, and registrations.'}
-            {isTeacher &&
-              'Faculty Instructor Portal — View student rosters, explore course curriculum, and track class enrollments.'}
-            {!isAdmin && !isTeacher &&
-              'Student Learning Portal — Explore available courses, register for your classes, and manage your academic enrollments.'}
+            {isAdmin
+              ? t('dashboard.adminSubtitle')
+              : isTeacher
+              ? t('dashboard.teacherSubtitle')
+              : t('dashboard.studentSubtitle')}
           </p>
         </div>
       </div>
@@ -136,7 +124,7 @@ export const DashboardPage = () => {
               <Users size={24} />
             </div>
             <div className="stat-info">
-              <p className="stat-label">Total Students</p>
+              <p className="stat-label">{t('dashboard.stats.totalStudents')}</p>
               <h3 className="stat-value">
                 {stats.loading ? '...' : stats.studentsCount}
               </h3>
@@ -150,7 +138,7 @@ export const DashboardPage = () => {
               <Briefcase size={24} />
             </div>
             <div className="stat-info">
-              <p className="stat-label">Total Teachers</p>
+              <p className="stat-label">{t('dashboard.stats.totalTeachers')}</p>
               <h3 className="stat-value">
                 {stats.loading ? '...' : stats.teachersCount}
               </h3>
@@ -163,35 +151,21 @@ export const DashboardPage = () => {
             <BookOpen size={24} />
           </div>
           <div className="stat-info">
-            <p className="stat-label">Total Courses</p>
+            <p className="stat-label">{t('dashboard.stats.activeCourses')}</p>
             <h3 className="stat-value">
               {stats.loading ? '...' : stats.coursesCount}
             </h3>
           </div>
         </div>
-
-        <div className="stat-card stat-card-security">
-          <div className="stat-icon-wrapper stat-icon-security">
-            <ShieldCheck size={24} />
-          </div>
-          <div className="stat-info">
-            <p className="stat-label">Security Role</p>
-            <h3 className="stat-value stat-role-highlight">{primaryRole}</h3>
-          </div>
-        </div>
       </div>
 
       {/* Quick Navigation Cards */}
-      <h2 className="section-title">Quick Actions</h2>
+      <h2 className="section-title">{t('dashboard.quickActions.title')}</h2>
       <div className="actions-grid">
         {(isAdmin || isTeacher) && (
           <Link
             to="/students"
             className="action-card action-card-students"
-            onClick={(e) => {
-              e.preventDefault();
-              handleNavigate('/students');
-            }}
           >
             <div className="action-header">
               <div className="action-icon action-icon-students">
@@ -201,8 +175,8 @@ export const DashboardPage = () => {
                 <ArrowRight size={18} className="arrow-icon" />
               </div>
             </div>
-            <h4>Manage Students</h4>
-            <p>Search, filter, paginate, register new students, and edit profiles.</p>
+            <h4>{t('dashboard.quickActions.registerStudent')}</h4>
+            <p>{t('dashboard.quickActions.registerStudentDesc')}</p>
           </Link>
         )}
 
@@ -210,10 +184,6 @@ export const DashboardPage = () => {
           <Link
             to="/teachers"
             className="action-card action-card-teachers"
-            onClick={(e) => {
-              e.preventDefault();
-              handleNavigate('/teachers');
-            }}
           >
             <div className="action-header">
               <div className="action-icon action-icon-teachers">
@@ -223,18 +193,14 @@ export const DashboardPage = () => {
                 <ArrowRight size={18} className="arrow-icon" />
               </div>
             </div>
-            <h4>Manage Teachers</h4>
-            <p>Faculty instructors directory, departments, and qualification profiles.</p>
+            <h4>{t('dashboard.quickActions.addTeacher')}</h4>
+            <p>{t('dashboard.quickActions.addTeacherDesc')}</p>
           </Link>
         )}
 
         <Link
           to="/courses"
           className="action-card action-card-courses"
-          onClick={(e) => {
-            e.preventDefault();
-            handleNavigate('/courses');
-          }}
         >
           <div className="action-header">
             <div className="action-icon action-icon-courses">
@@ -244,17 +210,13 @@ export const DashboardPage = () => {
               <ArrowRight size={18} className="arrow-icon" />
             </div>
           </div>
-          <h4>Browse Courses</h4>
-          <p>Explore courses, track remaining seat capacities, and check fees.</p>
+          <h4>{t('dashboard.quickActions.createCourse')}</h4>
+          <p>{t('dashboard.quickActions.createCourseDesc')}</p>
         </Link>
 
         <Link
           to="/enrollments"
           className="action-card action-card-enrollments"
-          onClick={(e) => {
-            e.preventDefault();
-            handleNavigate('/enrollments');
-          }}
         >
           <div className="action-header">
             <div className="action-icon action-icon-enrollments">
@@ -264,12 +226,8 @@ export const DashboardPage = () => {
               <ArrowRight size={18} className="arrow-icon" />
             </div>
           </div>
-          <h4>Course Enrollment</h4>
-          <p>
-            {!isAdmin && !isTeacher
-              ? 'Enroll in available courses and manage your class registrations.'
-              : 'Enroll student with early-bird discount calculation and seat deduction.'}
-          </p>
+          <h4>{t('dashboard.quickActions.enrollCourse')}</h4>
+          <p>{t('dashboard.quickActions.enrollCourseDesc')}</p>
         </Link>
       </div>
 
@@ -303,10 +261,10 @@ export const DashboardPage = () => {
             </div>
             <div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--color-text-main)' }}>
-                Courses Overview
+                {t('dashboard.coursesOverview.title')}
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: '3px 0 0 0' }}>
-                Current active courses, credit hours, seat capacities, and tuition fees
+                {t('dashboard.coursesOverview.subtitle')}
               </p>
             </div>
           </div>
@@ -321,15 +279,15 @@ export const DashboardPage = () => {
               className="btn-refresh"
               title="Refresh courses data"
             >
-              <RotateCw size={14} className={loadingCourses ? 'animate-spin' : ''} />
-              <span>Refresh</span>
+              <RotateCw size={16} className={loadingCourses ? 'animate-spin' : ''} />
+              <span>{t('common.refresh')}</span>
             </button>
             <Link
               to="/courses"
               className="btn btn-sm btn-primary flex items-center gap-1"
               style={{ textDecoration: 'none', padding: '7px 16px', fontSize: '0.84rem' }}
             >
-              <span>View Full Courses</span>
+              <span>{t('dashboard.coursesOverview.viewAll')}</span>
               <ArrowRight size={15} />
             </Link>
           </div>
@@ -339,11 +297,11 @@ export const DashboardPage = () => {
         {loadingCourses ? (
           <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
             <span className="btn-spinner btn-spinner-primary" style={{ width: 22, height: 22, marginRight: 8 }}></span>
-            <span>Loading courses catalog...</span>
+            <span>{t('common.loading')}</span>
           </div>
         ) : coursesList.length === 0 ? (
           <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
-            <p>No courses available at this time.</p>
+            <p>{t('common.noData')}</p>
           </div>
         ) : (
           <div className="table-responsive">
@@ -351,11 +309,11 @@ export const DashboardPage = () => {
               <thead>
                 <tr>
                   <th style={{ width: '60px' }}>#ID</th>
-                  <th>Course Code & Title</th>
-                  <th>Credits</th>
-                  <th>Tuition Fee</th>
-                  <th>Seat Availability</th>
-                  <th>Status</th>
+                  <th>{t('dashboard.coursesOverview.course')}</th>
+                  <th>{t('dashboard.coursesOverview.credits')}</th>
+                  <th>{t('dashboard.coursesOverview.tuitionFee')}</th>
+                  <th>{t('dashboard.coursesOverview.seatsStatus')}</th>
+                  <th>{t('common.status')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -381,7 +339,7 @@ export const DashboardPage = () => {
                         </div>
                       </td>
                       <td style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
-                        {course.credit || 3} Credits
+                        {course.credit || 3} {t('courses.credits')}
                       </td>
                       <td style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--color-text-main)' }}>
                         ${Number(course.fee || 0).toFixed(2)}
@@ -389,7 +347,7 @@ export const DashboardPage = () => {
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                           <span style={{ fontSize: '0.82rem', fontWeight: 600, color: isFull ? '#ef4444' : 'var(--color-text-main)' }}>
-                            {course.availableSeats} / {course.capacity} seats left
+                            {course.availableSeats} / {course.capacity} {t('dashboard.coursesOverview.seatsLeft')}
                           </span>
                           <div style={{ width: '120px', height: '6px', background: 'var(--color-border)', borderRadius: '4px', overflow: 'hidden' }}>
                             <div
@@ -408,7 +366,7 @@ export const DashboardPage = () => {
                             isFull ? 'cancelled' : isLimited ? 'pending' : 'confirmed'
                           }`}
                         >
-                          {isFull ? 'Class Full' : isLimited ? 'Few Seats' : 'Available'}
+                          {isFull ? t('status.full') : isLimited ? t('status.fewSeats') : t('status.available')}
                         </span>
                       </td>
                     </tr>

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../api/authApi';
+import { useLanguage } from '../context/LanguageContext';
 import { Lock, Mail, User, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { SchoolLogo } from '../components/SchoolLogo';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -29,6 +31,11 @@ export const RegisterPage = () => {
     e.preventDefault();
     setError('');
 
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Password and Confirm Password do not match.');
       return;
@@ -38,7 +45,10 @@ export const RegisterPage = () => {
 
     try {
       const payload = {
-        ...formData,
+        fullName: formData.fullName.trim(),
+        username: formData.username.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
         roles: ['ROLE_STUDENT'],
       };
       await authApi.register(payload);
@@ -46,7 +56,7 @@ export const RegisterPage = () => {
         replace: true,
         state: {
           successMessage: 'Registration successful! Please sign in with your account.',
-          defaultUsername: formData.username,
+          defaultUsername: formData.username.trim(),
         },
       });
     } catch (err) {
@@ -63,8 +73,8 @@ export const RegisterPage = () => {
           <div className="auth-icon-badge" style={{ background: 'transparent', padding: 0, boxShadow: 'none' }}>
             <SchoolLogo size={64} />
           </div>
-          <h2>Create New Account</h2>
-          <p>Join the School Management System</p>
+          <h2>{t('auth.createAccountTitle')}</h2>
+          <p>{t('auth.createAccountSubtitle')}</p>
         </div>
 
         {error && (
@@ -76,13 +86,13 @@ export const RegisterPage = () => {
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label>Full Name</label>
+            <label>{t('auth.fullName')}</label>
             <div className="input-with-icon">
               <User size={18} className="input-icon" />
               <input
                 type="text"
                 name="fullName"
-                placeholder="e.g. John Doe"
+                placeholder="e.g. Sok San"
                 value={formData.fullName}
                 onChange={handleChange}
                 required
@@ -91,11 +101,11 @@ export const RegisterPage = () => {
           </div>
 
           <div className="form-group">
-            <label>Username</label>
+            <label>{t('auth.usernameOrEmail')}</label>
             <input
               type="text"
               name="username"
-              placeholder="e.g. johndoe"
+              placeholder="e.g. soksan"
               value={formData.username}
               onChange={handleChange}
               required
@@ -103,13 +113,13 @@ export const RegisterPage = () => {
           </div>
 
           <div className="form-group">
-            <label>Email Address</label>
+            <label>Email</label>
             <div className="input-with-icon">
               <Mail size={18} className="input-icon" />
               <input
                 type="email"
                 name="email"
-                placeholder="e.g. john@school.edu.kh"
+                placeholder="e.g. soksan@school.edu.kh"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -119,7 +129,7 @@ export const RegisterPage = () => {
 
           <div className="form-row-2">
             <div className="form-group">
-              <label>Password</label>
+              <label>{t('auth.password')}</label>
               <div className="input-with-icon">
                 <Lock size={18} className="input-icon" />
                 <input
@@ -142,7 +152,7 @@ export const RegisterPage = () => {
             </div>
 
             <div className="form-group">
-              <label>Confirm Password</label>
+              <label>{t('auth.confirmPassword')}</label>
               <div className="input-with-icon">
                 <Lock size={18} className="input-icon" />
                 <input
@@ -174,19 +184,19 @@ export const RegisterPage = () => {
             {loading ? (
               <>
                 <span className="btn-spinner"></span>
-                <span>Creating Account...</span>
+                <span>{t('auth.registering')}</span>
               </>
             ) : (
-              'Complete Registration'
+              t('auth.registerBtn')
             )}
           </button>
         </form>
 
         <div className="auth-footer">
           <p>
-            Already have an account?{' '}
+            {t('auth.alreadyHaveAccount')}{' '}
             <Link to="/login" replace className="auth-link">
-              Sign In here
+              {t('auth.loginHere')}
             </Link>
           </p>
         </div>

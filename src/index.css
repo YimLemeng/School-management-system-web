@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'Kantumruy Pro', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   --color-primary: #6366f1;
@@ -121,17 +121,20 @@ body {
   bottom: 0;
   left: 0;
   z-index: 50;
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s ease;
+  overflow: visible;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: width;
 }
 
 .sidebar-brand {
-  padding: 18px 16px;
+  padding: 16px 16px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   border-bottom: 1px solid var(--color-border-light);
   min-height: 72px;
   position: relative;
+  transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .brand-logo-content {
@@ -139,9 +142,26 @@ body {
   align-items: center;
   gap: 12px;
   overflow: hidden;
+  transition: gap 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 145px;
+  opacity: 1;
+  transform: translateX(0);
+  transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-collapse-btn {
+  position: absolute;
+  top: 21px;
+  right: 14px;
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
   cursor: pointer;
@@ -152,14 +172,26 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.2s ease,
+              border-color 0.2s ease,
+              border-radius 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s ease,
+              transform 0.2s ease,
+              color 0.2s ease;
   flex-shrink: 0;
+  z-index: 60;
 }
 
 .sidebar-collapse-btn:hover {
   background: var(--color-surface-hover);
-  color: #a5b4fc;
+  color: #c7d2fe;
   border-color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.sidebar-collapse-btn:active {
+  transform: scale(0.95);
 }
 
 /* Collapsed Sidebar Styles */
@@ -168,7 +200,7 @@ body {
 }
 
 .app-sidebar.collapsed .sidebar-brand {
-  padding: 16px 8px;
+  padding: 16px 0;
   justify-content: center;
 }
 
@@ -177,17 +209,28 @@ body {
   justify-content: center;
 }
 
+.app-sidebar.collapsed .brand-text {
+  max-width: 0;
+  opacity: 0;
+  transform: translateX(-10px);
+  pointer-events: none;
+}
+
 .app-sidebar.collapsed .sidebar-collapse-btn {
-  position: absolute;
-  top: 22px;
   right: -13px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
   border-radius: 50%;
   width: 26px;
   height: 26px;
-  z-index: 60;
+  color: var(--color-text-main);
+}
+
+.app-sidebar.collapsed .sidebar-collapse-btn:hover {
+  background: #312e81;
+  color: #ffffff;
+  border-color: #6366f1;
 }
 
 .app-sidebar.collapsed .sidebar-user-card {
@@ -201,31 +244,49 @@ body {
 }
 
 .app-sidebar.collapsed .sidebar-nav {
-  padding: 12px 8px;
+  padding: 16px 10px;
 }
 
 .app-sidebar.collapsed .nav-link {
-  justify-content: center;
   padding: 10px;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
+  justify-content: center;
   gap: 0;
 }
 
-.app-sidebar.collapsed .nav-text,
+.app-sidebar.collapsed .nav-text {
+  max-width: 0;
+  opacity: 0;
+  transform: translateX(-8px);
+  pointer-events: none;
+}
+
 .app-sidebar.collapsed .nav-active-pill {
+  opacity: 0;
   display: none;
 }
 
 .app-sidebar.collapsed .sidebar-footer {
-  padding: 12px 8px;
+  padding: 16px 10px;
+  display: flex;
+  justify-content: center;
 }
 
 .app-sidebar.collapsed .btn-logout {
-  justify-content: center;
+  width: 48px;
+  height: 44px;
   padding: 10px;
+  justify-content: center;
+  gap: 0;
 }
 
-.app-sidebar.collapsed .btn-logout span {
-  display: none;
+.app-sidebar.collapsed .btn-logout .logout-text {
+  max-width: 0;
+  opacity: 0;
+  transform: translateX(-8px);
+  pointer-events: none;
 }
 
 .brand-icon-wrapper {
@@ -364,6 +425,8 @@ body {
   flex-direction: column;
   gap: 6px;
   overflow-y: auto;
+  overflow-x: hidden;
+  transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-link {
@@ -376,9 +439,17 @@ body {
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9rem;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 0.2s ease,
+              color 0.2s ease,
+              border-color 0.2s ease,
+              padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              gap 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.2s ease;
   position: relative;
   border: 1px solid transparent;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .nav-icon-box {
@@ -396,6 +467,15 @@ body {
 
 .nav-text {
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+  opacity: 1;
+  transform: translateX(0);
+  transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-active-pill {
@@ -403,7 +483,8 @@ body {
   height: 6px;
   border-radius: 50%;
   background: transparent;
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
 }
 
 /* Hover states: sleek slate/indigo hover */
@@ -459,6 +540,7 @@ body {
 .sidebar-footer {
   padding: 16px;
   border-top: 1px solid var(--color-border-light);
+  transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-logout {
@@ -474,7 +556,24 @@ body {
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.2s ease,
+              border-color 0.2s ease,
+              padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              gap 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.btn-logout .logout-text {
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 140px;
+  opacity: 1;
+  transform: translateX(0);
+  transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-logout:hover {
@@ -487,7 +586,8 @@ body {
   flex: 1;
   margin-left: 260px;
   min-height: 100vh;
-  transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: margin-left;
 }
 
 .app-main-content.sidebar-collapsed {
@@ -2713,22 +2813,32 @@ button:active:not(:disabled) {
 .btn-refresh {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 18px;
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  color: var(--color-text-muted);
-  font-size: 0.82rem;
+  color: var(--color-text-main);
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
 }
 
 .btn-refresh:hover:not(:disabled) {
   background: var(--color-surface-hover);
-  color: #a5b4fc;
+  color: #c7d2fe;
   border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-refresh:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 /* Responsive */
@@ -2756,4 +2866,180 @@ button:active:not(:disabled) {
     background: rgba(0, 0, 0, 0.3);
     z-index: 45;
   }
+}
+
+/* ==========================================================================
+   Desktop Top Navbar (User Profile & Language Switcher at Top Right)
+   ========================================================================== */
+.app-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 36px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: blur(8px);
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-brand-chip {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+}
+
+.topbar-subtext {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.topbar-divider {
+  width: 1px;
+  height: 26px;
+  background: var(--color-border);
+}
+
+.topbar-user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 12px 5px 6px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.topbar-user-card:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.topbar-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.35);
+}
+
+.topbar-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topbar-user-name {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  margin: 0;
+  line-height: 1.2;
+}
+
+@media (max-width: 900px) {
+  .app-topbar {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Language Switcher Component (Segmented Control Pill)
+   ========================================================================== */
+.lang-segmented-control {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 3px;
+  gap: 3px;
+  user-select: none;
+}
+
+.lang-seg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 11px;
+  border-radius: 16px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+}
+
+.lang-seg-btn:hover:not(.active) {
+  color: var(--color-text-main);
+  background: var(--color-surface-hover);
+}
+
+.lang-seg-btn.active {
+  background: var(--color-primary);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.35);
+}
+
+.lang-switch-collapsed {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lang-switch-collapsed:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-primary);
+  color: #818cf8;
 }

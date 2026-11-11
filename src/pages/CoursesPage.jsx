@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { courseApi } from '../api/courseApi';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   BookOpen,
   Search,
@@ -17,6 +18,7 @@ import {
 
 export const CoursesPage = () => {
   const { hasRole } = useAuth();
+  const { t } = useLanguage();
   const isAdmin = hasRole('ADMIN');
 
   const [courses, setCourses] = useState([]);
@@ -175,10 +177,8 @@ export const CoursesPage = () => {
 
       <div className="page-header">
         <div>
-          <h1 className="page-heading">Courses & Curriculum</h1>
-          <p className="page-subheading">
-            Browse active courses, track real-time available seats, and fees.
-          </p>
+          <h1 className="page-heading">{t('courses.title')}</h1>
+          <p className="page-subheading">{t('courses.subtitle')}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
@@ -187,8 +187,8 @@ export const CoursesPage = () => {
             className="btn-refresh"
             title="Refresh courses list"
           >
-            <RotateCw size={15} />
-            <span>Refresh</span>
+            <RotateCw size={17} />
+            <span>{t('common.refresh')}</span>
           </button>
           {isAdmin && (
             <button
@@ -200,7 +200,7 @@ export const CoursesPage = () => {
               className="btn btn-primary"
             >
               <Plus size={18} />
-              <span>Add Course</span>
+              <span>{t('courses.addCourse')}</span>
             </button>
           )}
         </div>
@@ -213,7 +213,7 @@ export const CoursesPage = () => {
             <Search size={18} className="input-icon" />
             <input
               type="text"
-              placeholder="Search by course title or code..."
+              placeholder={t('courses.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -223,7 +223,7 @@ export const CoursesPage = () => {
             <DollarSign size={18} className="input-icon" />
             <input
               type="number"
-              placeholder="Max Fee ($)"
+              placeholder={`${t('courses.fee')} Max`}
               value={maxFee}
               onChange={(e) => setMaxFee(e.target.value)}
             />
@@ -235,7 +235,7 @@ export const CoursesPage = () => {
               checked={availableOnly}
               onChange={(e) => setAvailableOnly(e.target.checked)}
             />
-            <span>Available Seats Only</span>
+            <span>{t('courses.filterAvailableOnly')}</span>
           </label>
 
           <button
@@ -246,10 +246,10 @@ export const CoursesPage = () => {
             {loading ? (
               <>
                 <span className="btn-spinner btn-spinner-primary"></span>
-                <span>Applying...</span>
+                <span>{t('common.loading')}</span>
               </>
             ) : (
-              'Apply Filter'
+              t('common.filter')
             )}
           </button>
         </form>
@@ -259,13 +259,13 @@ export const CoursesPage = () => {
       {loading ? (
         <div className="table-loading">
           <div className="spinner"></div>
-          <p>Loading courses curriculum...</p>
+          <p>{t('common.loading')}</p>
         </div>
       ) : courses.length === 0 ? (
         <div className="empty-state">
           <BookOpen size={48} className="empty-icon" />
-          <h3>No Courses Found</h3>
-          <p>Try clearing your search query or adjusting max fee filters.</p>
+          <h3>{t('common.noData')}</h3>
+          <p>{t('courses.subtitle')}</p>
         </div>
       ) : (
         <div className="courses-grid">
@@ -286,7 +286,7 @@ export const CoursesPage = () => {
                         isFull ? 'status-full' : 'status-open'
                       }`}
                     >
-                      {isFull ? 'FULL' : `${c.availableSeats} Seats Left`}
+                      {isFull ? t('status.full') : `${c.availableSeats} ${t('dashboard.coursesOverview.seatsLeft')}`}
                     </span>
                   </div>
 
@@ -295,7 +295,7 @@ export const CoursesPage = () => {
                       onClick={() => handleDeleteCourse(c.id, c.title)}
                       disabled={deletingId === c.id}
                       className="btn-course-delete-pro"
-                      title={`Delete Course "${c.title}" (Admin Only)`}
+                      title={t('common.delete')}
                       aria-label="Delete Course"
                     >
                       {deletingId === c.id ? (
@@ -303,23 +303,23 @@ export const CoursesPage = () => {
                       ) : (
                         <Trash2 size={12} />
                       )}
-                      <span>{deletingId === c.id ? 'Deleting...' : 'Delete'}</span>
+                      <span>{deletingId === c.id ? t('common.loading') : t('common.delete')}</span>
                     </button>
                   )}
                 </div>
 
                 <h3 className="course-title">{c.title}</h3>
                 <p className="course-dept">
-                  Department: <b>{c.departmentName || 'General'}</b>
+                  {t('teachers.department')}: <b>{c.departmentName || 'General'}</b>
                 </p>
                 <p className="course-instructor">
-                  Instructor: <b>{c.teacherName || 'Not Assigned'}</b>
+                  {t('teachers.teacherName')}: <b>{c.teacherName || 'Not Assigned'}</b>
                 </p>
 
                 {/* Capacity Progress Bar */}
                 <div className="capacity-box">
                   <div className="capacity-label">
-                    <span>Enrolled: {c.capacity - c.availableSeats}/{c.capacity}</span>
+                    <span>{t('courses.capacity')}: {c.capacity - c.availableSeats}/{c.capacity}</span>
                     <span>{seatsPercent}%</span>
                   </div>
                   <div className="progress-track">
@@ -334,7 +334,7 @@ export const CoursesPage = () => {
 
                 <div className="course-card-footer">
                   <div>
-                    <span className="fee-label">Course Fee</span>
+                    <span className="fee-label">{t('courses.fee')}</span>
                     <p className="fee-amount">${Number(c.fee).toFixed(2)}</p>
                   </div>
                   <Link
@@ -346,7 +346,7 @@ export const CoursesPage = () => {
                       if (isFull) e.preventDefault();
                     }}
                   >
-                    <span>{isFull ? 'Sold Out' : 'Enroll Now'}</span>
+                    <span>{isFull ? t('status.full') : t('dashboard.quickActions.enrollCourse')}</span>
                     <ArrowRight size={14} />
                   </Link>
                 </div>
@@ -363,7 +363,7 @@ export const CoursesPage = () => {
             <div className="modal-header">
               <div className="flex items-center gap-2">
                 <BookOpen className="text-indigo-600" size={22} />
-                <h3>Add New Course</h3>
+                <h3>{t('courses.addCourse')}</h3>
               </div>
               <button
                 type="button"
@@ -384,7 +384,7 @@ export const CoursesPage = () => {
 
               <div className="form-row-2">
                 <div className="form-group">
-                  <label>Course Code</label>
+                  <label>{t('courses.courseCode')}</label>
                   <input
                     type="text"
                     name="code"
@@ -397,7 +397,7 @@ export const CoursesPage = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Course Title</label>
+                  <label>{t('courses.courseTitle')}</label>
                   <input
                     type="text"
                     name="title"
@@ -412,7 +412,7 @@ export const CoursesPage = () => {
 
               <div className="form-row-3">
                 <div className="form-group">
-                  <label>Credits</label>
+                  <label>{t('courses.credits')}</label>
                   <input
                     type="number"
                     name="credit"
@@ -425,7 +425,7 @@ export const CoursesPage = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Capacity</label>
+                  <label>{t('courses.capacity')}</label>
                   <input
                     type="number"
                     name="capacity"
@@ -437,7 +437,7 @@ export const CoursesPage = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Course Fee ($)</label>
+                  <label>{t('courses.fee')}</label>
                   <input
                     type="number"
                     step="0.01"
@@ -451,7 +451,7 @@ export const CoursesPage = () => {
               </div>
 
               <div className="form-group">
-                <label>Description (Optional)</label>
+                <label>{t('departments.description')}</label>
                 <textarea
                   name="description"
                   rows={3}
@@ -469,7 +469,7 @@ export const CoursesPage = () => {
                   className="btn btn-secondary"
                   disabled={submittingCourse}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -479,10 +479,10 @@ export const CoursesPage = () => {
                   {submittingCourse ? (
                     <>
                       <span className="btn-spinner"></span>
-                      <span>Creating Course...</span>
+                      <span>{t('common.saving')}</span>
                     </>
                   ) : (
-                    'Create Course'
+                    t('courses.addCourse')
                   )}
                 </button>
               </div>

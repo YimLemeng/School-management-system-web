@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { enrollmentApi } from '../api/enrollmentApi';
 import { studentApi } from '../api/studentApi';
 import { courseApi } from '../api/courseApi';
@@ -19,6 +20,7 @@ import {
 
 export const EnrollmentsPage = () => {
   const { user, hasRole } = useAuth();
+  const { t } = useLanguage();
   const isAdmin = hasRole('ADMIN');
   const isStudent = hasRole('STUDENT') && !hasRole('ADMIN');
   const [searchParams] = useSearchParams();
@@ -344,10 +346,8 @@ export const EnrollmentsPage = () => {
 
       <div className="page-header">
         <div>
-          <h1 className="page-heading">Course Enrollment Manager</h1>
-          <p className="page-subheading">
-            Register students into courses, manage Pending & Confirm statuses, and track enrollments.
-          </p>
+          <h1 className="page-heading">{t('enrollments.title')}</h1>
+          <p className="page-subheading">{t('enrollments.subtitle')}</p>
         </div>
         <button
           type="button"
@@ -356,8 +356,8 @@ export const EnrollmentsPage = () => {
           className="btn-refresh"
           title="Reload enrollments and courses data"
         >
-          <RotateCw size={15} className={refreshing ? 'animate-spin' : ''} />
-          <span>Refresh Data</span>
+          <RotateCw size={17} className={refreshing ? 'animate-spin' : ''} />
+          <span>{t('common.refresh')}</span>
         </button>
       </div>
 
@@ -367,10 +367,10 @@ export const EnrollmentsPage = () => {
           <div>
             <div className="enrollment-form-title">
               <UserCheck className="text-indigo-600" size={22} />
-              <h3>New Enrollment Form</h3>
+              <h3>{t('enrollments.newEnrollment')}</h3>
             </div>
             <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '4px 0 0 32px' }}>
-              Choose a student, select course, and configure enrollment details
+              {t('enrollments.subtitle')}
             </p>
           </div>
         </div>
@@ -380,7 +380,7 @@ export const EnrollmentsPage = () => {
             {/* Student Field */}
             {isStudent ? (
               <div className="form-group">
-                <label>Student Account</label>
+                <label>{t('enrollments.student')}</label>
                 <div className="input-with-icon">
                   <UserCheck size={18} className="input-icon" />
                   <input
@@ -398,14 +398,14 @@ export const EnrollmentsPage = () => {
               </div>
             ) : (
               <div className="form-group">
-                <label>Select Student</label>
+                <label>{t('enrollments.student')}</label>
                 <select
                   value={studentId}
                   onChange={(e) => setStudentId(e.target.value)}
                   className="select-input"
                   required
                 >
-                  <option value="">Select Student</option>
+                  <option value="">{t('enrollments.selectStudent')}</option>
                   {students.map((st) => (
                     <option key={st.id} value={st.id}>
                       #{st.id} - {st.firstName} {st.lastName} ({st.email})
@@ -417,17 +417,17 @@ export const EnrollmentsPage = () => {
 
             {/* Course Field */}
             <div className="form-group">
-              <label>Select Course</label>
+              <label>{t('enrollments.course')}</label>
               <select
                 value={courseId}
                 onChange={(e) => setCourseId(e.target.value)}
                 className="select-input"
                 required
               >
-                <option value="">Select Course</option>
+                <option value="">{t('enrollments.selectCourse')}</option>
                 {courses.map((co) => (
                   <option key={co.id} value={co.id}>
-                    {co.code} - {co.title} (${co.fee} | {co.availableSeats} seats left)
+                    {co.code} - {co.title} (${co.fee} | {co.availableSeats} {t('dashboard.coursesOverview.seatsLeft')})
                   </option>
                 ))}
               </select>
@@ -435,21 +435,21 @@ export const EnrollmentsPage = () => {
 
             {/* Status Selection */}
             <div className="form-group">
-              <label>Enrollment Status</label>
+              <label>{t('common.status')}</label>
               <select
                 value={enrollmentStatus}
                 onChange={(e) => setEnrollmentStatus(e.target.value)}
                 className="select-input"
               >
-                <option value="CONFIRMED">Confirmed (Immediate Activation)</option>
-                <option value="PENDING">Pending (Requires Approval)</option>
+                <option value="CONFIRMED">{t('status.confirmed')}</option>
+                <option value="PENDING">{t('status.pending')}</option>
               </select>
             </div>
 
             {/* Discount Field - Only for Admin / Staff (Hidden for Students) */}
             {!isStudent && (
               <div className="form-group">
-                <label>Discount Percentage (%)</label>
+                <label>{t('enrollments.discountAmount')} (%)</label>
                 <div className="input-with-icon">
                   <Percent size={18} className="input-icon" />
                   <input
@@ -467,7 +467,7 @@ export const EnrollmentsPage = () => {
 
             {/* Note */}
             <div className={`form-group ${isStudent ? '' : 'col-span-2'}`}>
-              <label>Note</label>
+              <label>{t('departments.description')}</label>
               <input
                 type="text"
                 placeholder="Optional note..."
@@ -481,19 +481,19 @@ export const EnrollmentsPage = () => {
           <div className="enrollment-checkout-bar">
             <div className="enrollment-price-breakdown">
               <div className="price-item">
-                <span className="price-item-label">Original Fee</span>
+                <span className="price-item-label">{t('enrollments.standardFee')}</span>
                 <span className="price-item-value">${originalFee.toFixed(2)}</span>
               </div>
               {!isStudent && (
                 <div className="price-item">
-                  <span className="price-item-label">Discount Applied</span>
+                  <span className="price-item-label">{t('enrollments.discountAmount')}</span>
                   <span className="price-item-value discount">
                     -${discountVal.toFixed(2)} ({discountPercentage || 0}%)
                   </span>
                 </div>
               )}
               <div className="price-item price-item-total">
-                <span className="price-item-label">Final Payable Fee</span>
+                <span className="price-item-label">{t('enrollments.finalPrice')}</span>
                 <span className="price-final-bold">${calculatedFinalFee.toFixed(2)}</span>
               </div>
             </div>
@@ -506,17 +506,12 @@ export const EnrollmentsPage = () => {
               {submitting ? (
                 <>
                   <span className="btn-spinner"></span>
-                  <span>Processing...</span>
-                </>
-              ) : enrollmentStatus === 'PENDING' ? (
-                <>
-                  <Clock size={16} />
-                  <span>Submit Pending Enrollment</span>
+                  <span>{t('common.loading')}</span>
                 </>
               ) : (
                 <>
                   <CheckCircle2 size={16} />
-                  <span>Confirm Enrollment</span>
+                  <span>{t('dashboard.quickActions.enrollCourse')}</span>
                 </>
               )}
             </button>
@@ -554,10 +549,10 @@ export const EnrollmentsPage = () => {
             </div>
             <div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--color-text-main)' }}>
-                All Enrolled Students
+                {t('enrollments.title')}
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: '3px 0 0 0' }}>
-                Manage student registrations, review pending requests, and confirm enrollments
+                {t('enrollments.subtitle')}
               </p>
             </div>
           </div>
@@ -570,7 +565,7 @@ export const EnrollmentsPage = () => {
                 className={`filter-tab-pill ${statusFilter === 'ALL' ? 'active' : ''}`}
                 onClick={() => setStatusFilter('ALL')}
               >
-                All ({allEnrollments.length})
+                {t('common.all')} ({allEnrollments.length})
               </button>
               <button
                 type="button"
@@ -578,7 +573,7 @@ export const EnrollmentsPage = () => {
                 onClick={() => setStatusFilter('PENDING')}
               >
                 <Clock size={13} />
-                Pending ({pendingCount})
+                {t('status.pending')} ({pendingCount})
               </button>
               <button
                 type="button"
@@ -586,7 +581,7 @@ export const EnrollmentsPage = () => {
                 onClick={() => setStatusFilter('CONFIRMED')}
               >
                 <CheckCircle2 size={13} />
-                Confirmed ({confirmedCount})
+                {t('status.confirmed')} ({confirmedCount})
               </button>
               <button
                 type="button"
@@ -594,7 +589,7 @@ export const EnrollmentsPage = () => {
                 onClick={() => setStatusFilter('CANCELLED')}
               >
                 <X size={13} />
-                Cancelled ({cancelledCount})
+                {t('status.cancelled')} ({cancelledCount})
               </button>
             </div>
 
@@ -603,7 +598,7 @@ export const EnrollmentsPage = () => {
               <Search size={16} className="input-icon" />
               <input
                 type="text"
-                placeholder="Search student or course..."
+                placeholder={t('common.search')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ height: '36px', fontSize: '0.84rem' }}
@@ -635,16 +630,16 @@ export const EnrollmentsPage = () => {
         {loadingAllEnrollments ? (
           <div style={{ padding: '48px', textAlign: 'center', color: '#64748b' }}>
             <span className="btn-spinner btn-spinner-primary" style={{ width: 24, height: 24, marginRight: 10 }}></span>
-            <span style={{ fontSize: '0.9rem' }}>Loading enrollments data...</span>
+            <span style={{ fontSize: '0.9rem' }}>{t('common.loading')}</span>
           </div>
         ) : filteredEnrollments.length === 0 ? (
           <div style={{ padding: '48px 20px', textAlign: 'center', color: '#94a3b8' }}>
             <Layers size={42} style={{ margin: '0 auto 12px auto', opacity: 0.4 }} />
-            <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#64748b', margin: 0 }}>No Enrollments Found</h4>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#64748b', margin: 0 }}>{t('common.noData')}</h4>
             <p style={{ fontSize: '0.82rem', marginTop: '6px' }}>
               {searchTerm || statusFilter !== 'ALL'
-                ? 'Try adjusting your search query or filter.'
-                : 'No students have enrolled in any courses yet.'}
+                ? t('common.noData')
+                : t('enrollments.subtitle')}
             </p>
           </div>
         ) : (
@@ -653,14 +648,14 @@ export const EnrollmentsPage = () => {
               <thead>
                 <tr>
                   <th style={{ width: '60px' }}>#ID</th>
-                  <th>Student</th>
-                  <th>Course Code & Title</th>
-                  <th>Enrollment Date</th>
-                  <th>Original Fee</th>
-                  <th>Discount</th>
-                  <th>Final Fee</th>
-                  <th>Status</th>
-                  {isAdmin && <th style={{ textAlign: 'center', width: '160px' }}>Action</th>}
+                  <th>{t('enrollments.student')}</th>
+                  <th>{t('courses.courseCode')} & {t('courses.courseTitle')}</th>
+                  <th>{t('enrollments.enrollmentDate')}</th>
+                  <th>{t('enrollments.standardFee')}</th>
+                  <th>{t('enrollments.discountAmount')}</th>
+                  <th>{t('enrollments.finalPrice')}</th>
+                  <th>{t('common.status')}</th>
+                  {isAdmin && <th style={{ textAlign: 'center', width: '160px' }}>{t('common.actions')}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -720,7 +715,7 @@ export const EnrollmentsPage = () => {
                       <span className={`badge-status ${en.status ? en.status.toLowerCase() : 'confirmed'}`}>
                         {en.status === 'PENDING' && <Clock size={12} />}
                         {en.status === 'CONFIRMED' && <CheckCircle2 size={12} />}
-                        {en.status}
+                        {t(`status.${(en.status || 'confirmed').toLowerCase()}`, en.status)}
                       </span>
                     </td>
                     {isAdmin && (
@@ -739,12 +734,12 @@ export const EnrollmentsPage = () => {
                                 {confirmingId === en.id ? (
                                   <>
                                     <span className="btn-spinner" style={{ width: 12, height: 12 }}></span>
-                                    <span>Confirming...</span>
+                                    <span>{t('common.loading')}</span>
                                   </>
                                 ) : (
                                   <>
                                     <CheckCircle2 size={13} />
-                                    <span>Confirm</span>
+                                    <span>{t('common.confirm')}</span>
                                   </>
                                 )}
                               </button>
@@ -760,12 +755,12 @@ export const EnrollmentsPage = () => {
                                 {cancellingId === en.id ? (
                                   <>
                                     <span className="btn-spinner" style={{ width: 12, height: 12 }}></span>
-                                    <span>Cancelling...</span>
+                                    <span>{t('common.loading')}</span>
                                   </>
                                 ) : (
                                   <>
                                     <X size={13} />
-                                    <span>Cancel</span>
+                                    <span>{t('common.cancel')}</span>
                                   </>
                                 )}
                               </button>
@@ -774,7 +769,7 @@ export const EnrollmentsPage = () => {
 
                           {en.status === 'CONFIRMED' && (
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: '#10b981', fontWeight: 600 }}>
-                              <CheckCircle2 size={14} /> Confirmed
+                              <CheckCircle2 size={14} /> {t('status.confirmed')}
                             </span>
                           )}
 

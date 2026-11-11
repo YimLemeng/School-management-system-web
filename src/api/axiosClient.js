@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { isSafeTokenString, isTokenExpired } from '../utils/tokenSecurity';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
@@ -13,7 +14,14 @@ axiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      // Validate token structure and expiration prior to transmission
+      if (!isSafeTokenString(token) || isTokenExpired(token)) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('currentUser');
+        window.dispatchEvent(new CustomEvent('auth:logout', { detail: { reason: 'token_expired_request' } }));
+      } else {
+        config.headers.Authorization = `Bearer ${token.trim()}`;
+      }
     }
     return config;
   },
@@ -27,14 +35,17 @@ axiosClient.interceptors.response.use(
   (error) => {
     const originalRequest = error.config;
 
+    // Handle 401 Unauthorized securely
     if (
       error.response &&
       error.response.status === 401 &&
-      !originalRequest.url.includes('/auth/login') &&
-      !originalRequest.url.includes('/auth/register')
+      originalRequest &&
+      !originalRequest.url?.includes('/auth/login') &&
+      !originalRequest.url?.includes('/auth/register')
     ) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('currentUser');
+      window.dispatchEvent(new CustomEvent('auth:logout', { detail: { reason: 'unauthorized_401' } }));
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { authApi } from '../api/authApi';
 import {
   User,
@@ -14,6 +15,7 @@ import {
 
 export const ProfilePage = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [profile, setProfile] = useState(user);
 
   const [passData, setPassData] = useState({
@@ -52,7 +54,7 @@ export const ProfilePage = () => {
     setPassSuccess('');
 
     if (passData.newPassword !== passData.confirmNewPassword) {
-      setPassError('New password and Confirm new password do not match.');
+      setPassError(t('profile.passwordMismatch'));
       return;
     }
 
@@ -60,7 +62,7 @@ export const ProfilePage = () => {
 
     try {
       await authApi.changePassword(passData);
-      setPassSuccess('Password changed successfully! You can use your new password next time.');
+      setPassSuccess(t('profile.passwordSuccess'));
       setPassData({
         currentPassword: '',
         newPassword: '',
@@ -77,10 +79,8 @@ export const ProfilePage = () => {
     <div className="page-content">
       <div className="page-header">
         <div>
-          <h1 className="page-heading">User Account & Security</h1>
-          <p className="page-subheading">
-            Inspect your profile, active authorities, and update your security credentials.
-          </p>
+          <h1 className="page-heading">{t('profile.title')}</h1>
+          <p className="page-subheading">{t('profile.subtitle')}</p>
         </div>
       </div>
 
@@ -89,7 +89,7 @@ export const ProfilePage = () => {
         <div className="card-box">
           <div className="card-box-header">
             <User className="text-indigo-600" size={22} />
-            <h3>Profile Information</h3>
+            <h3>{t('profile.infoTitle')}</h3>
           </div>
 
           <div className="profile-avatar-row">
@@ -108,7 +108,7 @@ export const ProfilePage = () => {
             <div className="detail-item">
               <Mail size={16} className="text-gray-400" />
               <div className="flex-1">
-                <p className="detail-label">Email Address</p>
+                <p className="detail-label">{t('profile.email')}</p>
                 <p className="detail-val">{profile?.email || 'N/A'}</p>
               </div>
             </div>
@@ -116,16 +116,19 @@ export const ProfilePage = () => {
             <div className="detail-item">
               <Shield size={16} className="text-gray-400" />
               <div className="flex-1">
-                <p className="detail-label">Assigned Roles</p>
+                <p className="detail-label">{t('profile.assignedRoles')}</p>
                 <div className="flex gap-1.5 flex-wrap mt-1">
-                  {profile?.roles?.map((r) => (
-                    <span
-                      key={r}
-                      className={`badge-role role-${r.replace('ROLE_', '').toLowerCase()}`}
-                    >
-                      {r}
-                    </span>
-                  ))}
+                  {profile?.roles?.map((r) => {
+                    const cleanRole = r.replace('ROLE_', '').toLowerCase();
+                    return (
+                      <span
+                        key={r}
+                        className={`badge-role role-${cleanRole}`}
+                      >
+                        {t(`roles.${cleanRole}`, r)}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -133,11 +136,11 @@ export const ProfilePage = () => {
             <div className="detail-item">
               <Calendar size={16} className="text-gray-400" />
               <div className="flex-1">
-                <p className="detail-label">Account Created</p>
+                <p className="detail-label">{t('profile.createdAt')}</p>
                 <p className="detail-val">
                   {profile?.createdAt
                     ? new Date(profile.createdAt).toLocaleDateString()
-                    : 'Active'}
+                    : t('profile.activeStatus')}
                 </p>
               </div>
             </div>
@@ -148,7 +151,7 @@ export const ProfilePage = () => {
         <div className="card-box">
           <div className="card-box-header">
             <KeyRound className="text-amber-600" size={22} />
-            <h3>Change Password</h3>
+            <h3>{t('profile.changePasswordTitle')}</h3>
           </div>
 
           {passError && (
@@ -167,13 +170,13 @@ export const ProfilePage = () => {
 
           <form onSubmit={handlePasswordSubmit} className="modal-form">
             <div className="form-group">
-              <label>Current Password</label>
+              <label>{t('profile.currentPassword')}</label>
               <div className="input-with-icon">
                 <Lock size={18} className="input-icon" />
                 <input
                   type="password"
                   name="currentPassword"
-                  placeholder="Enter current password"
+                  placeholder="••••••••"
                   value={passData.currentPassword}
                   onChange={handlePasswordChange}
                   required
@@ -182,13 +185,13 @@ export const ProfilePage = () => {
             </div>
 
             <div className="form-group">
-              <label>New Password</label>
+              <label>{t('profile.newPassword')}</label>
               <div className="input-with-icon">
                 <Lock size={18} className="input-icon" />
                 <input
                   type="password"
                   name="newPassword"
-                  placeholder="Minimum 6 characters"
+                  placeholder="••••••••"
                   value={passData.newPassword}
                   onChange={handlePasswordChange}
                   required
@@ -197,13 +200,13 @@ export const ProfilePage = () => {
             </div>
 
             <div className="form-group">
-              <label>Confirm New Password</label>
+              <label>{t('profile.confirmNewPassword')}</label>
               <div className="input-with-icon">
                 <Lock size={18} className="input-icon" />
                 <input
                   type="password"
                   name="confirmNewPassword"
-                  placeholder="Re-enter new password"
+                  placeholder="••••••••"
                   value={passData.confirmNewPassword}
                   onChange={handlePasswordChange}
                   required
@@ -219,10 +222,10 @@ export const ProfilePage = () => {
               {passLoading ? (
                 <>
                   <span className="btn-spinner"></span>
-                  <span>Updating Password...</span>
+                  <span>{t('profile.updatingPassword')}</span>
                 </>
               ) : (
-                'Save New Password'
+                t('profile.updatePasswordBtn')
               )}
             </button>
           </form>

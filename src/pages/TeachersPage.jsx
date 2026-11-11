@@ -3,6 +3,7 @@ import { teacherApi } from '../api/teacherApi';
 import { departmentApi } from '../api/departmentApi';
 import { courseApi } from '../api/courseApi';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   GraduationCap,
   Plus,
@@ -25,6 +26,7 @@ import {
 
 export const TeachersPage = () => {
   const { hasRole } = useAuth();
+  const { t } = useLanguage();
   const [teachers, setTeachers] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -143,13 +145,13 @@ export const TeachersPage = () => {
     fetchAssignedCourses();
   }, []);
 
-  const handleOpenViewTeacher = async (t) => {
-    setViewingTeacherId(t.id);
-    setViewingTeacher(t);
+  const handleOpenViewTeacher = async (teacher) => {
+    setViewingTeacherId(teacher.id);
+    setViewingTeacher(teacher);
     setViewCoursesLoading(true);
     setViewCourses([]);
     try {
-      const res = await courseApi.getAllCourses({ teacherId: t.id, pageSize: 50 });
+      const res = await courseApi.getAllCourses({ teacherId: teacher.id, pageSize: 50 });
       const list = res.data?.content || res.data || [];
       setViewCourses(list);
     } catch {
@@ -176,22 +178,22 @@ export const TeachersPage = () => {
     setShowModal(true);
   };
 
-  const handleOpenEdit = (t) => {
+  const handleOpenEdit = (teacher) => {
     setIsEditing(true);
-    setEditingId(t.id);
+    setEditingId(teacher.id);
     setModalError('');
-    const deptMatch = departments.find((d) => d.name === t.departmentName);
+    const deptMatch = departments.find((d) => d.name === teacher.departmentName);
     setFormData({
-      firstName: t.firstName || '',
-      lastName: t.lastName || '',
-      email: t.email || '',
-      phoneNumber: t.phoneNumber || '',
-      gender: t.gender || 'MALE',
+      firstName: teacher.firstName || '',
+      lastName: teacher.lastName || '',
+      email: teacher.email || '',
+      phoneNumber: teacher.phoneNumber || '',
+      gender: teacher.gender || 'MALE',
       departmentId: deptMatch ? deptMatch.id : (departments[0]?.id || ''),
-      qualification: t.qualification || '',
-      yearsOfExperience: t.yearsOfExperience || 0,
-      emergencyPhone: t.emergencyPhone || '',
-      bio: t.bio || '',
+      qualification: teacher.qualification || '',
+      yearsOfExperience: teacher.yearsOfExperience || 0,
+      emergencyPhone: teacher.emergencyPhone || '',
+      bio: teacher.bio || '',
     });
     setShowModal(true);
   };
@@ -295,9 +297,9 @@ export const TeachersPage = () => {
 
       <div className="page-header">
         <div>
-          <h1 className="page-heading">Instructors & Faculty</h1>
+          <h1 className="page-heading">{t('teachers.title')}</h1>
           <p className="page-subheading">
-            Total {totalElements} academic teachers in the faculty directory.
+            {t('common.total')} {totalElements} {t('common.entries')}
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -307,13 +309,13 @@ export const TeachersPage = () => {
             className="btn-refresh"
             title="Refresh teachers list"
           >
-            <RotateCw size={15} />
-            <span>Refresh</span>
+            <RotateCw size={17} />
+            <span>{t('common.refresh')}</span>
           </button>
           {canManage && (
             <button onClick={handleOpenAdd} className="btn btn-primary">
               <Plus size={18} />
-              <span>Add Teacher</span>
+              <span>{t('teachers.addTeacher')}</span>
             </button>
           )}
         </div>
@@ -323,13 +325,13 @@ export const TeachersPage = () => {
       {loading ? (
         <div className="table-loading">
           <div className="spinner"></div>
-          <p>Loading faculty instructors...</p>
+          <p>{t('common.loading')}</p>
         </div>
       ) : teachers.length === 0 ? (
         <div className="empty-state">
           <GraduationCap size={48} className="empty-icon" />
-          <h3>No Teachers Found</h3>
-          <p>Click "Add Teacher" to register your first faculty member.</p>
+          <h3>{t('common.noData')}</h3>
+          <p>{t('teachers.subtitle')}</p>
         </div>
       ) : (
         <div className="table-card">
@@ -337,39 +339,39 @@ export const TeachersPage = () => {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Faculty Member</th>
-                  <th>Email</th>
-                  <th>Department</th>
-                  <th>Teaching Courses</th>
-                  <th>Qualification</th>
-                  <th>Experience</th>
-                  <th>Actions</th>
+                  <th>#ID</th>
+                  <th>{t('teachers.teacherName')}</th>
+                  <th>{t('teachers.email')}</th>
+                  <th>{t('teachers.department')}</th>
+                  <th>{t('teachers.assignedCourses')}</th>
+                  <th>{t('teachers.qualification')}</th>
+                  <th>{t('teachers.hireDate')}</th>
+                  <th>{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>
-                {teachers.map((t) => (
-                  <tr key={t.id}>
-                    <td className="font-mono text-gray-500">#{t.id}</td>
+                {teachers.map((teacher) => (
+                  <tr key={teacher.id}>
+                    <td className="font-mono text-gray-500">#{teacher.id}</td>
                     <td>
                       <div className="font-semibold text-gray-900">
-                        {t.firstName} {t.lastName}
+                        {teacher.firstName} {teacher.lastName}
                       </div>
                       <div className="text-xs text-gray-500 font-mono">
-                        {t.phoneNumber || 'No phone'}
+                        {teacher.phoneNumber || 'No phone'}
                       </div>
                     </td>
-                    <td className="text-gray-600">{t.email}</td>
+                    <td className="text-gray-600">{teacher.email}</td>
                     <td>
                       <span className="badge-department">
                         <Building2 size={13} className="badge-department-icon" />
-                        <span>{t.departmentName || 'General'}</span>
+                        <span>{teacher.departmentName || 'General'}</span>
                       </span>
                     </td>
                     <td>
-                      {teacherCoursesMap[t.id] && teacherCoursesMap[t.id].length > 0 ? (
+                      {teacherCoursesMap[teacher.id] && teacherCoursesMap[teacher.id].length > 0 ? (
                         <div className="flex flex-wrap gap-1.5 items-center">
-                          {teacherCoursesMap[t.id].map((c) => (
+                          {teacherCoursesMap[teacher.id].map((c) => (
                             <span
                               key={c.id}
                               className="badge-course-tag"
@@ -384,31 +386,31 @@ export const TeachersPage = () => {
                       )}
                     </td>
                     <td className="text-gray-700 text-sm">
-                      {t.qualification || 'N/A'}
+                      {teacher.qualification || 'N/A'}
                     </td>
                     <td className="text-gray-600 text-sm font-semibold">
-                      {t.yearsOfExperience || 0} Years
+                      {teacher.yearsOfExperience || 0} Years
                     </td>
                     <td>
                       <div className="actions-cell">
                         <button
-                          onClick={() => handleOpenViewTeacher(t)}
+                          onClick={() => handleOpenViewTeacher(teacher)}
                           className="btn-action-view"
-                          disabled={viewingTeacherId === t.id}
-                          title="View Teacher Profile"
+                          disabled={viewingTeacherId === teacher.id}
+                          title={t('teachers.viewDetails')}
                         >
-                          {viewingTeacherId === t.id ? (
+                          {viewingTeacherId === teacher.id ? (
                             <>
                               <span
                                 className="btn-spinner btn-spinner-primary"
                                 style={{ width: 13, height: 13 }}
                               ></span>
-                              <span>Loading...</span>
+                              <span>{t('common.loading')}</span>
                             </>
                           ) : (
                             <>
                               <Eye size={14} />
-                              <span>View</span>
+                              <span>{t('common.view')}</span>
                             </>
                           )}
                         </button>
@@ -416,21 +418,21 @@ export const TeachersPage = () => {
                         {canManage && (
                           <>
                             <button
-                              onClick={() => handleOpenEdit(t)}
+                              onClick={() => handleOpenEdit(teacher)}
                               className="btn-action-edit"
-                              title="Update Teacher Details (Admin)"
+                              title={t('teachers.editTeacher')}
                             >
                               <Pencil size={16} />
                             </button>
                             <button
                               onClick={() =>
-                                handleDelete(t.id, `${t.firstName} ${t.lastName}`)
+                                handleDelete(teacher.id, `${teacher.firstName} ${teacher.lastName}`)
                               }
                               className="btn-action-delete"
-                              disabled={deletingId === t.id}
-                              title="Delete Teacher (Admin)"
+                              disabled={deletingId === teacher.id}
+                              title={t('common.delete')}
                             >
-                              {deletingId === t.id ? (
+                              {deletingId === teacher.id ? (
                                 <span
                                   className="btn-spinner btn-spinner-primary"
                                   style={{ width: 14, height: 14 }}
@@ -452,8 +454,8 @@ export const TeachersPage = () => {
           {/* Pagination */}
           <div className="pagination-bar">
             <p className="pagination-info">
-              Showing Page <b>{pageNo + 1}</b> of <b>{totalPages || 1}</b> (Total{' '}
-              {totalElements} teachers)
+              {t('common.showing')} {t('common.page')} <b>{pageNo + 1}</b> {t('common.of')} <b>{totalPages || 1}</b> ({t('common.total')}{' '}
+              {totalElements} {t('common.entries')})
             </p>
             <div className="pagination-controls">
               <button
@@ -462,14 +464,14 @@ export const TeachersPage = () => {
                 className="btn-page"
               >
                 <ChevronLeft size={16} />
-                <span>Prev</span>
+                <span>{t('common.previous')}</span>
               </button>
               <button
                 onClick={() => setPageNo((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={pageNo >= totalPages - 1}
                 className="btn-page"
               >
-                <span>Next</span>
+                <span>{t('common.next')}</span>
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -483,7 +485,7 @@ export const TeachersPage = () => {
           <div className="modal-card">
             <div className="modal-header">
               <h3>
-                {isEditing ? 'Update Faculty Member' : 'Register New Faculty Member'}
+                {isEditing ? t('teachers.editTeacher') : t('teachers.addTeacher')}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
@@ -503,7 +505,7 @@ export const TeachersPage = () => {
 
               <div className="form-row-2">
                 <div className="form-group">
-                  <label>First Name</label>
+                  <label>{t('teachers.firstName')}</label>
                   <input
                     type="text"
                     name="firstName"
@@ -514,7 +516,7 @@ export const TeachersPage = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Last Name</label>
+                  <label>{t('teachers.lastName')}</label>
                   <input
                     type="text"
                     name="lastName"
@@ -527,7 +529,7 @@ export const TeachersPage = () => {
               </div>
 
               <div className="form-group">
-                <label>Email Address</label>
+                <label>{t('teachers.email')}</label>
                 <input
                   type="email"
                   name="email"
@@ -540,7 +542,7 @@ export const TeachersPage = () => {
 
               <div className="form-row-2">
                 <div className="form-group">
-                  <label>Phone Number</label>
+                  <label>{t('teachers.phoneNumber')}</label>
                   <input
                     type="text"
                     name="phoneNumber"
@@ -550,22 +552,22 @@ export const TeachersPage = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Gender</label>
+                  <label>{t('students.gender')}</label>
                   <select
                     name="gender"
                     value={formData.gender}
                     onChange={handleInputChange}
                     className="select-input"
                   >
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
+                    <option value="MALE">{t('students.male')}</option>
+                    <option value="FEMALE">{t('students.female')}</option>
                   </select>
                 </div>
               </div>
 
               <div className="form-row-2">
                 <div className="form-group">
-                  <label>Department</label>
+                  <label>{t('teachers.department')}</label>
                   <select
                     name="departmentId"
                     value={formData.departmentId}
@@ -581,7 +583,7 @@ export const TeachersPage = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Years of Experience</label>
+                  <label>{t('teachers.hireDate')}</label>
                   <input
                     type="number"
                     min="0"
@@ -593,7 +595,7 @@ export const TeachersPage = () => {
               </div>
 
               <div className="form-group">
-                <label>Academic Qualification</label>
+                <label>{t('teachers.qualification')}</label>
                 <input
                   type="text"
                   name="qualification"
@@ -604,7 +606,7 @@ export const TeachersPage = () => {
               </div>
 
               <div className="form-group">
-                <label>Biography / Summary</label>
+                <label>{t('departments.description')}</label>
                 <input
                   type="text"
                   name="bio"
@@ -621,7 +623,7 @@ export const TeachersPage = () => {
                   className="btn btn-secondary"
                   disabled={submitting}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -631,12 +633,12 @@ export const TeachersPage = () => {
                   {submitting ? (
                     <>
                       <span className="btn-spinner"></span>
-                      <span>{isEditing ? 'Updating...' : 'Saving...'}</span>
+                      <span>{t('common.saving')}</span>
                     </>
                   ) : isEditing ? (
-                    'Update Teacher'
+                    t('common.save')
                   ) : (
-                    'Save Faculty Member'
+                    t('teachers.addTeacher')
                   )}
                 </button>
               </div>
@@ -652,7 +654,7 @@ export const TeachersPage = () => {
             <div className="modal-header">
               <div className="flex items-center gap-2">
                 <Briefcase className="text-amber-600" size={22} />
-                <h3 className="text-lg font-bold">Faculty Profile Details</h3>
+                <h3 className="text-lg font-bold">{t('teachers.viewDetails')}</h3>
               </div>
               <button
                 type="button"
@@ -697,7 +699,7 @@ export const TeachersPage = () => {
                 <div className="profile-info-item">
                   <div className="profile-info-label">
                     <Mail size={13} />
-                    <span>Email Address</span>
+                    <span>{t('teachers.email')}</span>
                   </div>
                   <span className="profile-info-val">
                     {viewingTeacher.email || 'N/A'}
@@ -707,7 +709,7 @@ export const TeachersPage = () => {
                 <div className="profile-info-item">
                   <div className="profile-info-label">
                     <Phone size={13} />
-                    <span>Phone Number</span>
+                    <span>{t('teachers.phoneNumber')}</span>
                   </div>
                   <span className="profile-info-val font-mono">
                     {viewingTeacher.phoneNumber || 'N/A'}
@@ -717,7 +719,7 @@ export const TeachersPage = () => {
                 <div className="profile-info-item">
                   <div className="profile-info-label">
                     <Award size={13} />
-                    <span>Qualification</span>
+                    <span>{t('teachers.qualification')}</span>
                   </div>
                   <span className="profile-info-val">
                     {viewingTeacher.qualification || 'N/A'}
@@ -727,7 +729,7 @@ export const TeachersPage = () => {
                 <div className="profile-info-item">
                   <div className="profile-info-label">
                     <Briefcase size={13} />
-                    <span>Experience</span>
+                    <span>{t('teachers.hireDate')}</span>
                   </div>
                   <span className="profile-info-val" style={{ color: '#d97706' }}>
                     {viewingTeacher.yearsOfExperience || 0} Years
@@ -737,10 +739,10 @@ export const TeachersPage = () => {
                 <div className="profile-info-item">
                   <div className="profile-info-label">
                     <BookOpen size={13} />
-                    <span>Teaching Courses</span>
+                    <span>{t('teachers.assignedCourses')}</span>
                   </div>
                   <span className="profile-info-val" style={{ color: '#d97706', fontWeight: 700 }}>
-                    {viewCourses.length} Course(s)
+                    {viewCourses.length} {t('nav.courses')}
                   </span>
                 </div>
               </div>
@@ -749,7 +751,7 @@ export const TeachersPage = () => {
               <div className="profile-modal-section">
                 <div className="profile-modal-section-title">
                   <BookOpen size={16} style={{ color: '#d97706' }} />
-                  <span>Assigned Teaching Courses</span>
+                  <span>{t('teachers.assignedCourses')}</span>
                 </div>
 
                 {viewCoursesLoading ? (
@@ -761,11 +763,11 @@ export const TeachersPage = () => {
                         borderTopColor: '#d97706',
                       }}
                     ></span>
-                    <span>Loading teaching courses...</span>
+                    <span>{t('common.loading')}</span>
                   </div>
                 ) : viewCourses.length === 0 ? (
                   <p className="text-xs text-gray-400 italic py-2">
-                    No courses are currently assigned to this faculty member.
+                    {t('teachers.noCourses')}
                   </p>
                 ) : (
                   <div className="profile-courses-list">
@@ -782,7 +784,7 @@ export const TeachersPage = () => {
                             <span>{c.title}</span>
                           </div>
                           <div className="student-course-meta">
-                            Credits: <b>{c.credit}</b> | Capacity: <b>{c.capacity}</b> ({c.availableSeats} seats left) | Fee: <b>${Number(c.fee).toFixed(2)}</b>
+                            {t('courses.credits')}: <b>{c.credit}</b> | {t('courses.capacity')}: <b>{c.capacity}</b> ({c.availableSeats} {t('dashboard.coursesOverview.seatsLeft')}) | {t('courses.fee')}: <b>${Number(c.fee).toFixed(2)}</b>
                           </div>
                         </div>
                       </div>
@@ -796,7 +798,7 @@ export const TeachersPage = () => {
                 <div className="profile-modal-section">
                   <div className="profile-modal-section-title">
                     <BookOpen size={16} style={{ color: '#d97706' }} />
-                    <span>Biography & Background</span>
+                    <span>{t('departments.description')}</span>
                   </div>
                   <p className="text-xs text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-md border border-gray-100">
                     {viewingTeacher.bio}
@@ -811,7 +813,7 @@ export const TeachersPage = () => {
                 onClick={() => setViewingTeacher(null)}
                 className="btn btn-secondary"
               >
-                Close
+                {t('common.close')}
               </button>
             </div>
           </div>

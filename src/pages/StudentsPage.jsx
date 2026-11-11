@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { studentApi } from '../api/studentApi';
 import { enrollmentApi } from '../api/enrollmentApi';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   Search,
   Plus,
@@ -25,6 +26,7 @@ import {
 
 export const StudentsPage = () => {
   const { hasRole } = useAuth();
+  const { t } = useLanguage();
   const isAdmin = hasRole('ADMIN');
   const isTeacher = hasRole('TEACHER');
   const canManage = isAdmin || isTeacher;
@@ -251,9 +253,9 @@ export const StudentsPage = () => {
 
       <div className="page-header">
         <div>
-          <h1 className="page-heading">Students Management</h1>
+          <h1 className="page-heading">{t('students.title')}</h1>
           <p className="page-subheading">
-            Total {totalElements} registered students in the system.
+            {t('common.total')} {totalElements} {t('common.entries')}
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -263,8 +265,8 @@ export const StudentsPage = () => {
             className="btn-refresh"
             title="Refresh students list"
           >
-            <RotateCw size={15} />
-            <span>Refresh</span>
+            <RotateCw size={17} />
+            <span>{t('common.refresh')}</span>
           </button>
           {canManage && (
             <button
@@ -272,7 +274,7 @@ export const StudentsPage = () => {
               className="btn btn-primary"
             >
               <Plus size={18} />
-              <span>Add Student</span>
+              <span>{t('students.addStudent')}</span>
             </button>
           )}
         </div>
@@ -285,7 +287,7 @@ export const StudentsPage = () => {
             <Search size={18} className="input-icon" />
             <input
               type="text"
-              placeholder="Search by first name, last name, or email..."
+              placeholder={t('students.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -301,9 +303,9 @@ export const StudentsPage = () => {
               }}
               className="select-input select-with-lead-icon"
             >
-              <option value="">All Genders</option>
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
+              <option value="">{t('students.allGenders')}</option>
+              <option value="MALE">{t('students.male')}</option>
+              <option value="FEMALE">{t('students.female')}</option>
             </select>
           </div>
 
@@ -315,10 +317,10 @@ export const StudentsPage = () => {
             {loading ? (
               <>
                 <span className="btn-spinner btn-spinner-primary"></span>
-                <span>Searching...</span>
+                <span>{t('common.searching')}</span>
               </>
             ) : (
-              'Search'
+              t('common.search')
             )}
           </button>
         </form>
@@ -329,26 +331,26 @@ export const StudentsPage = () => {
         {loading ? (
           <div className="table-loading">
             <div className="spinner"></div>
-            <p>Loading students data...</p>
+            <p>{t('common.loading')}</p>
           </div>
         ) : students.length === 0 ? (
           <div className="empty-state">
             <UserPlus size={48} className="empty-icon" />
-            <h3>No Students Found</h3>
-            <p>Try adjusting your search criteria or register a new student.</p>
+            <h3>{t('common.noData')}</h3>
+            <p>{t('students.subtitle')}</p>
           </div>
         ) : (
           <div className="table-responsive">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Full Name</th>
-                  <th>Email</th>
-                  <th>Phone Number</th>
-                  <th>Gender</th>
-                  <th>Date of Birth</th>
-                  <th>Actions</th>
+                  <th>#ID</th>
+                  <th>{t('students.fullName')}</th>
+                  <th>{t('students.email')}</th>
+                  <th>{t('students.phoneNumber')}</th>
+                  <th>{t('students.gender')}</th>
+                  <th>{t('students.dateOfBirth')}</th>
+                  <th>{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -364,7 +366,7 @@ export const StudentsPage = () => {
                     </td>
                     <td>
                       <span className={`badge-gender ${st.gender?.toLowerCase()}`}>
-                        {st.gender}
+                        {st.gender === 'MALE' ? t('students.male') : st.gender === 'FEMALE' ? t('students.female') : st.gender}
                       </span>
                     </td>
                     <td className="text-gray-600 text-sm">{st.dateOfBirth}</td>
@@ -373,7 +375,7 @@ export const StudentsPage = () => {
                         onClick={() => handleOpenView(st)}
                         className="btn-action-view"
                         disabled={viewingId === st.id}
-                        title="View Student Profile"
+                        title={t('students.viewDetails')}
                       >
                         {viewingId === st.id ? (
                           <>
@@ -381,12 +383,12 @@ export const StudentsPage = () => {
                               className="btn-spinner btn-spinner-primary"
                               style={{ width: 13, height: 13 }}
                             ></span>
-                            <span>Loading...</span>
+                            <span>{t('common.loading')}</span>
                           </>
                         ) : (
                           <>
                             <Eye size={14} />
-                            <span>View</span>
+                            <span>{t('common.view')}</span>
                           </>
                         )}
                       </button>
@@ -395,7 +397,7 @@ export const StudentsPage = () => {
                         <button
                           onClick={() => handleOpenEdit(st)}
                           className="btn-action-edit"
-                          title="Update Student Information"
+                          title={t('students.editStudent')}
                         >
                           <Pencil size={15} />
                         </button>
@@ -408,7 +410,7 @@ export const StudentsPage = () => {
                           }
                           className="btn-action-delete"
                           disabled={deletingId === st.id}
-                          title="Delete Student (Admin Only)"
+                          title={t('common.delete')}
                         >
                           {deletingId === st.id ? (
                             <span
@@ -431,8 +433,8 @@ export const StudentsPage = () => {
         {/* Pagination Bar */}
         <div className="pagination-bar">
           <p className="pagination-info">
-            Showing Page <b>{pageNo + 1}</b> of <b>{totalPages || 1}</b> (Total{' '}
-            {totalElements} items)
+            {t('common.showing')} {t('common.page')} <b>{pageNo + 1}</b> {t('common.of')} <b>{totalPages || 1}</b> ({t('common.total')}{' '}
+            {totalElements} {t('common.entries')})
           </p>
           <div className="pagination-controls">
             <button
@@ -441,14 +443,14 @@ export const StudentsPage = () => {
               className="btn-page"
             >
               <ChevronLeft size={16} />
-              <span>Prev</span>
+              <span>{t('common.previous')}</span>
             </button>
             <button
               onClick={() => setPageNo((p) => Math.min(totalPages - 1, p + 1))}
               disabled={pageNo >= totalPages - 1}
               className="btn-page"
             >
-              <span>Next</span>
+              <span>{t('common.next')}</span>
               <ChevronRight size={16} />
             </button>
           </div>
@@ -460,7 +462,7 @@ export const StudentsPage = () => {
         <div className="modal-backdrop">
           <div className="modal-card">
             <div className="modal-header">
-              <h3>{isEditing ? 'Update Student Information' : 'Add New Student'}</h3>
+              <h3>{isEditing ? t('students.editStudent') : t('students.addStudent')}</h3>
               <button
                 onClick={() => setShowModal(false)}
                 className="btn-close"
@@ -479,7 +481,7 @@ export const StudentsPage = () => {
 
               <div className="form-row-2">
                 <div className="form-group">
-                  <label>First Name</label>
+                  <label>{t('students.firstName')}</label>
                   <input
                     type="text"
                     name="firstName"
@@ -490,7 +492,7 @@ export const StudentsPage = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Last Name</label>
+                  <label>{t('students.lastName')}</label>
                   <input
                     type="text"
                     name="lastName"
@@ -503,7 +505,7 @@ export const StudentsPage = () => {
               </div>
 
               <div className="form-group">
-                <label>Email Address</label>
+                <label>{t('students.email')}</label>
                 <input
                   type="email"
                   name="email"
@@ -516,7 +518,7 @@ export const StudentsPage = () => {
 
               <div className="form-row-2">
                 <div className="form-group">
-                  <label>Phone Number</label>
+                  <label>{t('students.phoneNumber')}</label>
                   <input
                     type="text"
                     name="phoneNumber"
@@ -526,21 +528,21 @@ export const StudentsPage = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Gender</label>
+                  <label>{t('students.gender')}</label>
                   <select
                     name="gender"
                     value={formData.gender}
                     onChange={handleInputChange}
                     className="select-input"
                   >
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
+                    <option value="MALE">{t('students.male')}</option>
+                    <option value="FEMALE">{t('students.female')}</option>
                   </select>
                 </div>
               </div>
 
               <div className="form-group">
-                <label>Date of Birth</label>
+                <label>{t('students.dateOfBirth')}</label>
                 <input
                   type="date"
                   name="dateOfBirth"
@@ -557,7 +559,7 @@ export const StudentsPage = () => {
                   className="btn btn-secondary"
                   disabled={submitting}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -567,12 +569,12 @@ export const StudentsPage = () => {
                   {submitting ? (
                     <>
                       <span className="btn-spinner"></span>
-                      <span>{isEditing ? 'Updating Student...' : 'Saving Student...'}</span>
+                      <span>{t('common.saving')}</span>
                     </>
                   ) : isEditing ? (
-                    'Update Student'
+                    t('common.save')
                   ) : (
-                    'Save Student'
+                    t('students.addStudent')
                   )}
                 </button>
               </div>
@@ -588,7 +590,7 @@ export const StudentsPage = () => {
             <div className="modal-header">
               <div className="flex items-center gap-2">
                 <GraduationCap className="text-indigo-600" size={22} />
-                <h3 className="text-lg font-bold">Student Profile Details</h3>
+                <h3 className="text-lg font-bold">{t('students.viewDetails')}</h3>
               </div>
               <button
                 type="button"
@@ -615,7 +617,7 @@ export const StudentsPage = () => {
                       ID: #{viewingStudent.id}
                     </span>
                     <span className={`badge-gender ${viewingStudent.gender?.toLowerCase()}`}>
-                      {viewingStudent.gender}
+                      {viewingStudent.gender === 'MALE' ? t('students.male') : viewingStudent.gender === 'FEMALE' ? t('students.female') : viewingStudent.gender}
                     </span>
                   </div>
                 </div>
@@ -626,7 +628,7 @@ export const StudentsPage = () => {
                 <div className="profile-info-item">
                   <div className="profile-info-label">
                     <Mail size={13} />
-                    <span>Email Address</span>
+                    <span>{t('students.email')}</span>
                   </div>
                   <span className="profile-info-val">
                     {viewingStudent.email || 'N/A'}
@@ -636,7 +638,7 @@ export const StudentsPage = () => {
                 <div className="profile-info-item">
                   <div className="profile-info-label">
                     <Phone size={13} />
-                    <span>Phone Number</span>
+                    <span>{t('students.phoneNumber')}</span>
                   </div>
                   <span className="profile-info-val font-mono">
                     {viewingStudent.phoneNumber || 'N/A'}
@@ -646,7 +648,7 @@ export const StudentsPage = () => {
                 <div className="profile-info-item">
                   <div className="profile-info-label">
                     <Calendar size={13} />
-                    <span>Date of Birth</span>
+                    <span>{t('students.dateOfBirth')}</span>
                   </div>
                   <span className="profile-info-val">
                     {viewingStudent.dateOfBirth || 'N/A'}
@@ -656,10 +658,10 @@ export const StudentsPage = () => {
                 <div className="profile-info-item">
                   <div className="profile-info-label">
                     <BookOpen size={13} />
-                    <span>Enrolled Courses</span>
+                    <span>{t('students.enrolledCourses')}</span>
                   </div>
                   <span className="profile-info-val" style={{ color: 'var(--color-primary)' }}>
-                    {viewEnrollments.length} Course(s)
+                    {viewEnrollments.length} {t('nav.courses')}
                   </span>
                 </div>
               </div>
@@ -668,17 +670,17 @@ export const StudentsPage = () => {
               <div className="profile-modal-section">
                 <div className="profile-modal-section-title">
                   <BookOpen size={16} style={{ color: 'var(--color-primary)' }} />
-                  <span>Enrolled Courses</span>
+                  <span>{t('students.enrolledCourses')}</span>
                 </div>
 
                 {viewLoading ? (
                   <div className="py-4 text-center text-gray-400 text-sm">
                     <span className="btn-spinner btn-spinner-primary mr-2"></span>
-                    <span>Loading courses...</span>
+                    <span>{t('common.loading')}</span>
                   </div>
                 ) : viewEnrollments.length === 0 ? (
                   <p className="text-xs text-gray-400 italic py-2">
-                    No active course enrollments found for this student.
+                    {t('students.noEnrollments')}
                   </p>
                 ) : (
                   <div className="profile-courses-list">
@@ -692,7 +694,7 @@ export const StudentsPage = () => {
                             <span>{en.courseTitle}</span>
                           </div>
                           <div className="student-course-meta">
-                            Status: <b className="text-emerald-600">{en.status}</b> | Fee: ${Number(en.finalFee).toFixed(2)}
+                            {t('common.status')}: <b className="text-emerald-600">{en.status}</b> | {t('courses.fee')}: ${Number(en.finalFee).toFixed(2)}
                           </div>
                         </div>
                       </div>
@@ -708,7 +710,7 @@ export const StudentsPage = () => {
                 onClick={() => setViewingStudent(null)}
                 className="btn btn-secondary"
               >
-                Close
+                {t('common.close')}
               </button>
             </div>
           </div>

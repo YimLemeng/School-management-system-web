@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import {
   LayoutDashboard,
   Users,
@@ -19,6 +21,7 @@ import { SchoolLogo } from '../components/SchoolLogo';
 
 export const DashboardLayout = () => {
   const { user, logout, hasRole } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -58,17 +61,16 @@ export const DashboardLayout = () => {
   const isTeacher = hasRole('TEACHER');
 
   const allNavItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard, visible: true, theme: 'dashboard' },
-    { name: 'Departments', path: '/departments', icon: Building2, visible: isAdmin, theme: 'departments' },
-    { name: 'Students', path: '/students', icon: Users, visible: isAdmin || isTeacher, theme: 'students' },
-    { name: 'Teachers', path: '/teachers', icon: Briefcase, visible: isAdmin, theme: 'teachers' },
-    { name: 'Courses', path: '/courses', icon: BookOpen, visible: true, theme: 'courses' },
-    { name: 'Enrollments', path: '/enrollments', icon: UserCheck, visible: true, theme: 'enrollments' },
-    { name: 'My Profile', path: '/profile', icon: User, visible: true, theme: 'profile' },
+    { name: t('nav.dashboard'), path: '/', icon: LayoutDashboard, visible: true },
+    { name: t('nav.departments'), path: '/departments', icon: Building2, visible: isAdmin },
+    { name: t('nav.students'), path: '/students', icon: Users, visible: isAdmin || isTeacher },
+    { name: t('nav.teachers'), path: '/teachers', icon: Briefcase, visible: isAdmin },
+    { name: t('nav.courses'), path: '/courses', icon: BookOpen, visible: true },
+    { name: t('nav.enrollments'), path: '/enrollments', icon: UserCheck, visible: true },
+    { name: t('nav.profile'), path: '/profile', icon: User, visible: true },
   ];
 
   const navItems = allNavItems.filter((item) => item.visible);
-
   const primaryRole = user?.roles?.[0]?.replace('ROLE_', '') || 'USER';
 
   return (
@@ -77,15 +79,18 @@ export const DashboardLayout = () => {
       <header className="mobile-header">
         <div className="brand-logo" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <SchoolLogo size={28} shadow={false} />
-          <span>SchoolMS</span>
+          <span>{t('brand.title')}</span>
         </div>
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="btn-icon"
-          aria-label="Toggle Navigation"
-        >
-          {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <LanguageSwitcher />
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="btn-icon"
+            aria-label="Toggle Navigation"
+          >
+            {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </header>
 
       {/* Sidebar with Desktop Collapse Toggle */}
@@ -93,14 +98,12 @@ export const DashboardLayout = () => {
         <div className="sidebar-brand">
           <div className="brand-logo-content">
             <div className="brand-icon-wrapper" style={{ padding: 0, background: 'transparent' }}>
-              <SchoolLogo size={isCollapsed ? 34 : 44} />
+              <SchoolLogo size={40} />
             </div>
-            {!isCollapsed && (
-              <div className="brand-text">
-                <h1 className="brand-title">School MS</h1>
-                <p className="brand-subtitle">Management System</p>
-              </div>
-            )}
+            <div className="brand-text">
+              <h1 className="brand-title">{t('brand.title')}</h1>
+              <p className="brand-subtitle">{t('brand.subtitle')}</p>
+            </div>
           </div>
 
           {/* Toggle Button for Open/Close Desktop Sidebar */}
@@ -115,22 +118,7 @@ export const DashboardLayout = () => {
           </button>
         </div>
 
-        {/* User Card */}
-        <div className="sidebar-user-card" title={isCollapsed ? `${user?.fullName || user?.username} (${primaryRole})` : undefined}>
-          <div className="user-avatar">
-            {user?.username?.substring(0, 2).toUpperCase() || 'US'}
-          </div>
-          {!isCollapsed && (
-            <div className="user-info">
-              <p className="user-name">{user?.fullName || user?.username}</p>
-              <span className={`badge-role role-${primaryRole.toLowerCase()}`}>
-                {primaryRole}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Navigation links */}
+        {/* Navigation links (User Card was moved to Top Navbar as requested) */}
         <nav className="sidebar-nav">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -150,8 +138,8 @@ export const DashboardLayout = () => {
                 <div className="nav-icon-box">
                   <Icon size={19} className="nav-icon" />
                 </div>
-                {!isCollapsed && <span className="nav-text">{item.name}</span>}
-                {!isCollapsed && <span className="nav-active-pill" />}
+                <span className="nav-text">{item.name}</span>
+                <span className="nav-active-pill" />
               </NavLink>
             );
           })}
@@ -165,17 +153,17 @@ export const DashboardLayout = () => {
             className="btn-logout btn-logout-trigger"
             data-no-loading="true"
             disabled={loggingOut}
-            title={isCollapsed ? 'Sign Out' : undefined}
+            title={isCollapsed ? t('nav.signOut') : undefined}
           >
             {loggingOut ? (
               <>
                 <span className="btn-spinner" style={{ width: 14, height: 14 }}></span>
-                {!isCollapsed && <span>Signing Out...</span>}
+                <span className="logout-text">{t('nav.signingOut')}</span>
               </>
             ) : (
               <>
                 <LogOut size={18} />
-                {!isCollapsed && <span>Sign Out</span>}
+                <span className="logout-text">{t('nav.signOut')}</span>
               </>
             )}
           </button>
@@ -184,6 +172,39 @@ export const DashboardLayout = () => {
 
       {/* Main Content Area */}
       <main className={`app-main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
+        {/* Desktop Top Navbar (User Profile & Language Switcher at Top Right) */}
+        <header className="app-topbar">
+          <div className="topbar-left">
+            <div className="topbar-breadcrumb">
+              <span className="topbar-brand-chip">{t('brand.fullName')}</span>
+            </div>
+          </div>
+
+          <div className="topbar-right">
+            {/* Language Switcher (🇬🇧 EN | 🇰🇭 ខ្មែរ) */}
+            <LanguageSwitcher />
+
+            <div className="topbar-divider" />
+
+            {/* User Profile Card in Top Right */}
+            <div
+              className="topbar-user-card"
+              onClick={() => navigate('/profile')}
+              title={user?.fullName || user?.username}
+            >
+              <div className="topbar-avatar">
+                {user?.username?.substring(0, 2).toUpperCase() || 'AD'}
+              </div>
+              <div className="topbar-user-info">
+                <p className="topbar-user-name">{user?.fullName || user?.username}</p>
+                <span className={`badge-role role-${primaryRole.toLowerCase()}`}>
+                  {t(`roles.${primaryRole.toLowerCase()}`, primaryRole)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </header>
+
         <div className="content-inner">
           <Outlet />
         </div>
@@ -209,9 +230,9 @@ export const DashboardLayout = () => {
             className="signout-modal-card"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="signout-modal-title">Sign Out</h3>
+            <h3 className="signout-modal-title">{t('auth.signOutConfirmTitle')}</h3>
             <p className="signout-modal-message">
-              Are you sure you want to log out of your account?
+              {t('auth.signOutConfirmMsg')}
             </p>
             <div className="signout-modal-actions">
               <button
@@ -221,7 +242,7 @@ export const DashboardLayout = () => {
                 onClick={() => setShowLogoutModal(false)}
                 disabled={loggingOut}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"
@@ -229,7 +250,7 @@ export const DashboardLayout = () => {
                 onClick={confirmLogout}
                 disabled={loggingOut}
               >
-                Sign Out
+                {t('nav.signOut')}
               </button>
             </div>
           </div>
