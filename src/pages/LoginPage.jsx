@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff, ShieldAlert } from 'lucide-react';
@@ -171,15 +171,6 @@ export const LoginPage = () => {
             )}
           </button>
         </form>
-
-        <div className="auth-footer">
-          <p>
-            {t('auth.dontHaveAccount')}{' '}
-            <Link to="/register" className="auth-link">
-              {t('auth.registerHere')}
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   );

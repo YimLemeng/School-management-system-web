@@ -8,7 +8,6 @@ import { PublicRoute } from './components/PublicRoute';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { StudentsPage } from './pages/StudentsPage';
 import { TeachersPage } from './pages/TeachersPage';
@@ -34,14 +33,7 @@ export function App() {
                   </PublicRoute>
                 }
               />
-              <Route
-                path="/register"
-                element={
-                  <PublicRoute>
-                    <RegisterPage />
-                  </PublicRoute>
-                }
-              />
+              <Route path="/register" element={<Navigate to="/login" replace />} />
 
               {/* Protected Application Routes */}
               <Route
