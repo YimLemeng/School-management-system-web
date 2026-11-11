@@ -116,8 +116,8 @@ export const LoginPage = () => {
         </form>
 
         {/* Quick Demo Credentials */}
-        <div style={{ marginTop: '24px', paddingTop: '18px', borderTop: '1px solid #e2e8f0' }}>
-          <p style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, textAlign: 'center', marginBottom: '10px' }}>
+        <div style={{ marginTop: '24px', paddingTop: '18px', borderTop: '1px solid var(--color-border)' }}>
+          <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 600, textAlign: 'center', marginBottom: '10px' }}>
             ⚡ One-Click Demo Accounts
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
@@ -128,22 +128,23 @@ export const LoginPage = () => {
                 setPassword('admin123');
               }}
               style={{
-                background: '#f8fafc',
-                border: '1px solid #cbd5e1',
+                background: 'var(--color-surface-alt)',
+                border: '1px solid var(--color-border)',
                 borderRadius: '8px',
                 padding: '8px 4px',
                 fontSize: '0.78rem',
                 fontWeight: 600,
-                color: '#1e293b',
+                color: 'var(--color-text-main)',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '2px',
+                transition: 'all 0.2s ease',
               }}
             >
               <span>👑 Admin</span>
-              <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 400 }}>admin123</span>
+              <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>admin123</span>
             </button>
 
             <button
@@ -153,22 +154,23 @@ export const LoginPage = () => {
                 setPassword('teacher123');
               }}
               style={{
-                background: '#f8fafc',
-                border: '1px solid #cbd5e1',
+                background: 'var(--color-surface-alt)',
+                border: '1px solid var(--color-border)',
                 borderRadius: '8px',
                 padding: '8px 4px',
                 fontSize: '0.78rem',
                 fontWeight: 600,
-                color: '#1e293b',
+                color: 'var(--color-text-main)',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '2px',
+                transition: 'all 0.2s ease',
               }}
             >
               <span>👨‍🏫 Teacher</span>
-              <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 400 }}>teacher123</span>
+              <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>teacher123</span>
             </button>
           </div>
         </div>

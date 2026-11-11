@@ -302,10 +302,10 @@ export const DashboardPage = () => {
               <BookOpen size={22} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: '#1e293b' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--color-text-main)' }}>
                 Courses Overview
               </h3>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '3px 0 0 0' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: '3px 0 0 0' }}>
                 Current active courses, credit hours, seat capacities, and tuition fees
               </p>
             </div>
@@ -370,28 +370,28 @@ export const DashboardPage = () => {
                           <span style={{ fontWeight: 700, color: '#4f46e5', fontFamily: 'monospace', fontSize: '0.82rem' }}>
                             {course.code}
                           </span>
-                          <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#1e293b' }}>
+                          <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--color-text-main)' }}>
                             {course.title}
                           </span>
                           {course.description && (
-                            <span style={{ fontSize: '0.75rem', color: '#64748b', maxWidth: '420px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', maxWidth: '420px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {course.description}
                             </span>
                           )}
                         </div>
                       </td>
-                      <td style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>
+                      <td style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
                         {course.credit || 3} Credits
                       </td>
-                      <td style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
+                      <td style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--color-text-main)' }}>
                         ${Number(course.fee || 0).toFixed(2)}
                       </td>
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: isFull ? '#dc2626' : '#1e293b' }}>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: isFull ? '#ef4444' : 'var(--color-text-main)' }}>
                             {course.availableSeats} / {course.capacity} seats left
                           </span>
-                          <div style={{ width: '120px', height: '6px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{ width: '120px', height: '6px', background: 'var(--color-border)', borderRadius: '4px', overflow: 'hidden' }}>
                             <div
                               style={{
                                 width: `${Math.min(100, Math.max(0, ((course.capacity - course.availableSeats) / (course.capacity || 1)) * 100))}%`,

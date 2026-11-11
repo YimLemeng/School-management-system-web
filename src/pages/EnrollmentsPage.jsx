@@ -392,7 +392,7 @@ export const EnrollmentsPage = () => {
                     }
                     disabled
                     className="select-input font-bold"
-                    style={{ background: '#f8fafc', color: '#1e293b', cursor: 'not-allowed' }}
+                    style={{ background: 'var(--color-surface-alt)', color: 'var(--color-text-muted)', cursor: 'not-allowed' }}
                   />
                 </div>
               </div>
@@ -553,10 +553,10 @@ export const EnrollmentsPage = () => {
               <GraduationCap size={22} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: '#1e293b' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--color-text-main)' }}>
                 All Enrolled Students
               </h3>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '3px 0 0 0' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: '3px 0 0 0' }}>
                 Manage student registrations, review pending requests, and confirm enrollments
               </p>
             </div>
@@ -673,11 +673,11 @@ export const EnrollmentsPage = () => {
                           {getInitials(en.studentName)}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ fontWeight: 600, color: '#1e293b' }}>
+                          <span style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>
                             {en.studentName || `Student #${en.studentId}`}
                           </span>
                           {en.studentEmail && (
-                            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
                               {en.studentEmail}
                             </span>
                           )}
@@ -689,12 +689,12 @@ export const EnrollmentsPage = () => {
                         <span style={{ fontWeight: 700, color: '#4f46e5', fontFamily: 'monospace', fontSize: '0.8rem' }}>
                           {en.courseCode}
                         </span>
-                        <span style={{ fontSize: '0.82rem', color: '#334155' }}>
+                        <span style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
                           {en.courseTitle}
                         </span>
                       </div>
                     </td>
-                    <td style={{ fontSize: '0.8rem', color: '#64748b', whiteSpace: 'nowrap' }}>
+                    <td style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>
                       {en.enrollmentDate ? new Date(en.enrollmentDate).toLocaleDateString('en-GB', {
                         day: '2-digit',
                         month: 'short',
@@ -703,16 +703,16 @@ export const EnrollmentsPage = () => {
                         minute: '2-digit',
                       }) : '—'}
                     </td>
-                    <td style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                    <td style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
                       ${Number(en.originalFee || 0).toFixed(2)}
                     </td>
-                    <td style={{ fontSize: '0.85rem', color: Number(en.discountAmount) > 0 ? '#16a34a' : '#64748b', fontWeight: Number(en.discountAmount) > 0 ? 600 : 400 }}>
+                    <td style={{ fontSize: '0.85rem', color: Number(en.discountAmount) > 0 ? '#16a34a' : 'var(--color-text-muted)', fontWeight: Number(en.discountAmount) > 0 ? 600 : 400 }}>
                       {Number(en.discountAmount) > 0
                         ? `-$${Number(en.discountAmount).toFixed(2)}`
                         : '$0.00'}
                     </td>
                     <td>
-                      <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.9rem' }}>
+                      <span style={{ fontWeight: 700, color: 'var(--color-text-main)', fontSize: '0.9rem' }}>
                         ${Number(en.finalFee || 0).toFixed(2)}
                       </span>
                     </td>
