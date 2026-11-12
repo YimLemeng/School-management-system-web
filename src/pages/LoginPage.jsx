@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff, ShieldAlert, KeyRound, ArrowRight } from 'lucide-react';
@@ -9,10 +9,17 @@ const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_SECONDS = 30;
 
 export const LoginPage = () => {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // If already authenticated, redirect immediately
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const [usernameOrEmail, setUsernameOrEmail] = useState(
     location.state?.defaultUsername || ''
@@ -85,6 +92,10 @@ export const LoginPage = () => {
       setLoading(false);
     }
   };
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="auth-page-container">

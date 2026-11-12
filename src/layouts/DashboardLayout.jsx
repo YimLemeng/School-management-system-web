@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -56,6 +56,23 @@ export const DashboardLayout = () => {
     navigate('/login', { replace: true });
     setLoggingOut(false);
   };
+
+  // Prevent Safari / Browser Back button from dropping out of the authenticated Dashboard back into Login
+  useEffect(() => {
+    // Push a boundary state on dashboard so clicking back button stays on dashboard
+    window.history.pushState(null, '', window.location.href);
+
+    const handlePopState = () => {
+      if (window.location.pathname === '/' || window.location.pathname === '/login') {
+        window.history.pushState(null, '', window.location.href);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
   const isAdmin = hasRole('ADMIN');
   const isTeacher = hasRole('TEACHER');
