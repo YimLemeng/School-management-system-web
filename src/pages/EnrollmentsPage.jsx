@@ -142,8 +142,8 @@ export const EnrollmentsPage = () => {
         if (coRes.status === 'fulfilled' && coRes.value.data) {
           const cList = coRes.value.data.content || [];
           setCourses(cList);
-          if (cList.length > 0 && !preselectedCourseId) {
-            setCourseId(cList[0].id.toString());
+          if (preselectedCourseId) {
+            setCourseId(preselectedCourseId);
           }
         }
 
