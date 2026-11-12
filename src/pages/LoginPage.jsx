@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff, ShieldAlert } from 'lucide-react';
+import { Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff, ShieldAlert, KeyRound, ArrowRight } from 'lucide-react';
 import { SchoolLogo } from '../components/SchoolLogo';
 
 const MAX_FAILED_ATTEMPTS = 5;
@@ -155,19 +155,23 @@ export const LoginPage = () => {
 
           <button
             type="submit"
-            className="btn btn-primary btn-block"
+            className="btn btn-auth-terminal btn-block"
             data-no-loading="true"
             disabled={loading || lockoutTimer > 0}
           >
             {loading ? (
               <>
-                <span className="btn-spinner"></span>
+                <span className="btn-spinner" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#ffffff' }}></span>
                 <span>{t('auth.authenticating')}</span>
               </>
             ) : lockoutTimer > 0 ? (
               `Locked (${lockoutTimer}s)`
             ) : (
-              t('auth.signInBtn')
+              <>
+                <KeyRound size={20} style={{ transform: 'scaleX(-1)' }} />
+                <span>{t('auth.signInBtn')}</span>
+                <ArrowRight size={19} />
+              </>
             )}
           </button>
         </form>
