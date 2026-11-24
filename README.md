@@ -37,15 +37,15 @@ Access to the system is strictly authenticated and managed by administrators (pu
 - **Brute-Force & Rate-Limiting Guard**: Automatic temporary lockout (30 seconds) on 5 consecutive failed login attempts with live countdown timer and immediate password memory clearance.
 - **Role-Based Route Guards**: Fine-grained route protection (`ProtectedRoute` & `PublicRoute`) guarding Admin, Teacher, and Student routes with instant preloader feedback.
 
-### 🎨 AdminLTE Clean Architecture & Silky Smooth UI
-- **Professional Academic Design**: AdminLTE clean light theme canvas with charcoal-slate dark sidebar and crisp card elevations.
+### 🎨 Modern Clean Architecture & Silky Smooth UI
+- **Professional Academic Design**: Modern clean light theme canvas with charcoal-slate dark sidebar and crisp card elevations.
 - **Campus Login Background**: High-resolution university campus background with a dark slate/navy gradient overlay and glassmorphic language switcher.
 - **React Portal Modals (`ModalPortal`)**:
   - Modals mount directly on `document.body` via React Portals.
   - Guarantees 100vw × 100vh full-screen backdrop overlay without any bottom cut-offs or viewport displacement.
   - Mathematically centered in the browser viewport across all screen sizes and zoom levels.
 - **Centered Loading & Empty States**:
-  - Centralized responsive loading spinner (`.table-loading`) with signature AdminLTE blue spinner.
+  - Centralized responsive loading spinner (`.table-loading`) with signature primary blue spinner.
   - Centered empty-state banners with contextual iconography.
 - **Ultra-Smooth Transitions**:
   - Global `scroll-behavior: smooth` and font anti-aliasing.
@@ -144,7 +144,7 @@ school-management-frontend/
 │   ├── i18n/
 │   │   └── translations.js    # English & Khmer translation dictionary
 │   ├── layouts/
-│   │   └── DashboardLayout.jsx# AdminLTE layout with top navigation & smooth collapsible sidebar
+│   │   └── DashboardLayout.jsx# Layout with top navigation & smooth collapsible sidebar
 │   ├── pages/
 │   │   ├── CoursesPage.jsx    # Course catalog, teacher selection modal & pagination
 │   │   ├── DashboardPage.jsx  # Metrics overview & quick action triggers
@@ -157,7 +157,7 @@ school-management-frontend/
 │   ├── utils/
 │   │   └── tokenSecurity.js   # JWT decode, expiry check & token sanitization
 │   ├── App.jsx                # Main routing configuration
-│   ├── index.css              # AdminLTE clean styles, animations & responsive system
+│   ├── index.css              # Modern clean styles, animations & responsive system
 │   └── main.jsx               # React root bootstrap
 ```
 
