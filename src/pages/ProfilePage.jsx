@@ -88,60 +88,68 @@ export const ProfilePage = () => {
         {/* Left: User Profile Card */}
         <div className="card-box">
           <div className="card-box-header">
-            <User className="text-indigo-600" size={22} />
-            <h3>{t('profile.infoTitle')}</h3>
-          </div>
-
-          <div className="profile-avatar-row">
-            <div className="profile-avatar-large">
-              {profile?.username?.substring(0, 2).toUpperCase() || 'US'}
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                {profile?.fullName || profile?.username}
-              </h2>
-              <p className="text-gray-500 font-mono text-sm">@{profile?.username}</p>
+            <div className="card-box-title">
+              <User className="card-header-icon" size={20} />
+              <h3>{t('profile.infoTitle')}</h3>
             </div>
           </div>
 
-          <div className="profile-details-list">
-            <div className="detail-item">
-              <Mail size={16} className="text-gray-400" />
-              <div className="flex-1">
-                <p className="detail-label">{t('profile.email')}</p>
-                <p className="detail-val">{profile?.email || 'N/A'}</p>
+          <div className="card-box-body">
+            <div className="profile-user-header">
+              <div className="profile-avatar-large">
+                {profile?.username?.substring(0, 2).toUpperCase() || 'US'}
+              </div>
+              <div className="profile-user-titles">
+                <h2 className="profile-full-name">
+                  {profile?.fullName || profile?.username}
+                </h2>
+                <span className="profile-username-tag">@{profile?.username}</span>
               </div>
             </div>
 
-            <div className="detail-item">
-              <Shield size={16} className="text-gray-400" />
-              <div className="flex-1">
-                <p className="detail-label">{t('profile.assignedRoles')}</p>
-                <div className="flex gap-1.5 flex-wrap mt-1">
-                  {profile?.roles?.map((r) => {
-                    const cleanRole = r.replace('ROLE_', '').toLowerCase();
-                    return (
-                      <span
-                        key={r}
-                        className={`badge-role role-${cleanRole}`}
-                      >
-                        {t(`roles.${cleanRole}`, r)}
-                      </span>
-                    );
-                  })}
+            <div className="profile-info-list">
+              <div className="profile-info-row">
+                <div className="profile-info-meta">
+                  <Mail size={16} className="profile-meta-icon" />
+                  <span className="profile-info-label">{t('profile.email')}</span>
+                </div>
+                <div className="profile-info-val">
+                  {profile?.email || 'N/A'}
                 </div>
               </div>
-            </div>
 
-            <div className="detail-item">
-              <Calendar size={16} className="text-gray-400" />
-              <div className="flex-1">
-                <p className="detail-label">{t('profile.createdAt')}</p>
-                <p className="detail-val">
+              <div className="profile-info-row">
+                <div className="profile-info-meta">
+                  <Shield size={16} className="profile-meta-icon" />
+                  <span className="profile-info-label">{t('profile.assignedRoles')}</span>
+                </div>
+                <div className="profile-info-val">
+                  <div className="flex gap-1.5 flex-wrap">
+                    {profile?.roles?.map((r) => {
+                      const cleanRole = r.replace('ROLE_', '').toLowerCase();
+                      return (
+                        <span
+                          key={r}
+                          className={`badge-role role-${cleanRole}`}
+                        >
+                          {t(`roles.${cleanRole}`, r)}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="profile-info-row">
+                <div className="profile-info-meta">
+                  <Calendar size={16} className="profile-meta-icon" />
+                  <span className="profile-info-label">{t('profile.createdAt')}</span>
+                </div>
+                <div className="profile-info-val">
                   {profile?.createdAt
                     ? new Date(profile.createdAt).toLocaleDateString()
                     : t('profile.activeStatus')}
-                </p>
+                </div>
               </div>
             </div>
           </div>
@@ -150,8 +158,10 @@ export const ProfilePage = () => {
         {/* Right: Change Password Card */}
         <div className="card-box">
           <div className="card-box-header">
-            <KeyRound className="text-amber-600" size={22} />
-            <h3>{t('profile.changePasswordTitle')}</h3>
+            <div className="card-box-title">
+              <KeyRound className="card-header-icon text-warning" size={20} />
+              <h3>{t('profile.changePasswordTitle')}</h3>
+            </div>
           </div>
 
           {passError && (

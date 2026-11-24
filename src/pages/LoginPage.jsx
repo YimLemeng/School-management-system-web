@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff, ShieldAlert, KeyRound, ArrowRight } from 'lucide-react';
 import { SchoolLogo } from '../components/SchoolLogo';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_SECONDS = 30;
@@ -99,12 +100,20 @@ export const LoginPage = () => {
 
   return (
     <div className="auth-page-container">
+      <div className="auth-lang-pill">
+        <LanguageSwitcher />
+      </div>
+
       <div className="auth-card">
         <div className="auth-header">
-          <div className="auth-icon-badge" style={{ background: 'transparent', padding: 0, boxShadow: 'none' }}>
-            <SchoolLogo size={64} />
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+            <SchoolLogo size={52} />
           </div>
-          <h2>{t('auth.signInTitle')}</h2>
+          <div style={{ marginBottom: 4 }}>
+            <span className="brand-name-adminlte" style={{ fontSize: '1.75rem', color: '#212529' }}>
+              School<span className="brand-bold">MS</span>
+            </span>
+          </div>
           <p>{t('auth.signInSubtitle')}</p>
         </div>
 
@@ -130,7 +139,7 @@ export const LoginPage = () => {
               <input
                 type="text"
                 autoComplete="username"
-                placeholder="e.g. admin or admin@school.edu.kh"
+                placeholder={t('auth.usernamePlaceholder')}
                 value={usernameOrEmail}
                 onChange={(e) => setUsernameOrEmail(e.target.value)}
                 disabled={loading || lockoutTimer > 0}

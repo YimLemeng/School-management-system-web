@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { departmentApi } from '../api/departmentApi';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { ModalPortal } from '../components/ModalPortal';
 import {
   Building2,
   Plus,
@@ -317,8 +318,9 @@ export const DepartmentsPage = () => {
 
       {/* Add / Edit Department Modal */}
       {showModal && (
-        <div className="modal-backdrop">
-          <div className="modal-card">
+        <ModalPortal>
+          <div className="modal-backdrop">
+            <div className="modal-card">
             <div className="modal-header">
               <div className="flex items-center gap-2">
                 <Building2 className="text-indigo-600" size={22} />
@@ -408,6 +410,7 @@ export const DepartmentsPage = () => {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

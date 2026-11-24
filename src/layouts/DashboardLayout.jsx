@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
@@ -14,15 +14,15 @@ import {
   LogOut,
   Menu,
   X,
-  PanelLeftClose,
-  PanelLeftOpen,
 } from 'lucide-react';
 import { SchoolLogo } from '../components/SchoolLogo';
+import { ModalPortal } from '../components/ModalPortal';
 
 export const DashboardLayout = () => {
   const { user, logout, hasRole } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(() => {
     try {
@@ -59,7 +59,6 @@ export const DashboardLayout = () => {
 
   // Prevent Safari / Browser Back button from dropping out of the authenticated Dashboard back into Login
   useEffect(() => {
-    // Push a boundary state on dashboard so clicking back button stays on dashboard
     window.history.pushState(null, '', window.location.href);
 
     const handlePopState = () => {
@@ -90,6 +89,10 @@ export const DashboardLayout = () => {
   const navItems = allNavItems.filter((item) => item.visible);
   const primaryRole = user?.roles?.[0]?.replace('ROLE_', '') || 'USER';
 
+  const activeNavItem = allNavItems.find((item) =>
+    item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
+  ) || { name: t('nav.dashboard') };
+
   return (
     <div className="app-container">
       {/* Mobile Top Bar */}
@@ -110,32 +113,31 @@ export const DashboardLayout = () => {
         </div>
       </header>
 
-      {/* Sidebar with Desktop Collapse Toggle */}
+      {/* AdminLTE Dark Sidebar */}
       <aside className={`app-sidebar ${sidebarOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
+        {/* Brand Section */}
         <div className="sidebar-brand">
-          <div className="brand-logo-content">
-            <div className="brand-icon-wrapper" style={{ padding: 0, background: 'transparent' }}>
-              <SchoolLogo size={40} />
-            </div>
+          <div
+            className="brand-logo-content"
+            onClick={() => navigate('/')}
+            style={{ cursor: 'pointer' }}
+          >
+            <SchoolLogo size={32} />
             <div className="brand-text">
-              <h1 className="brand-title">{t('brand.title')}</h1>
-              <p className="brand-subtitle">{t('brand.subtitle')}</p>
+              <span className="brand-name-adminlte">
+                School<span className="brand-bold">MS</span>
+              </span>
+              <span className="brand-subtitle">{t('brand.subtitle')}</span>
             </div>
           </div>
-
-          {/* Toggle Button for Open/Close Desktop Sidebar */}
-          <button
-            type="button"
-            onClick={toggleSidebarCollapse}
-            className="sidebar-collapse-btn"
-            title={isCollapsed ? 'Open / Expand Sidebar' : 'Close / Collapse Sidebar'}
-            aria-label="Toggle Sidebar"
-          >
-            {isCollapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
-          </button>
         </div>
 
-        {/* Navigation links (User Card was moved to Top Navbar as requested) */}
+        {/* Section Header */}
+        <div className="sidebar-header-label">
+          <span>{t('nav.mainNav')}</span>
+        </div>
+
+        {/* Navigation links */}
         <nav className="sidebar-nav">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -153,10 +155,9 @@ export const DashboardLayout = () => {
                 }
               >
                 <div className="nav-icon-box">
-                  <Icon size={19} className="nav-icon" />
+                  <Icon size={18} className="nav-icon" />
                 </div>
                 <span className="nav-text">{item.name}</span>
-                <span className="nav-active-pill" />
               </NavLink>
             );
           })}
@@ -179,7 +180,7 @@ export const DashboardLayout = () => {
               </>
             ) : (
               <>
-                <LogOut size={18} />
+                <LogOut size={16} />
                 <span className="logout-text">{t('nav.signOut')}</span>
               </>
             )}
@@ -189,21 +190,48 @@ export const DashboardLayout = () => {
 
       {/* Main Content Area */}
       <main className={`app-main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
-        {/* Desktop Top Navbar (User Profile & Language Switcher at Top Right) */}
+        {/* AdminLTE Top Navbar */}
         <header className="app-topbar">
           <div className="topbar-left">
+            <button
+              type="button"
+              onClick={() => {
+                if (window.innerWidth <= 1024) {
+                  setSidebarOpen((prev) => !prev);
+                } else {
+                  toggleSidebarCollapse();
+                }
+              }}
+              className="topbar-nav-toggle"
+              title="Toggle Sidebar"
+              aria-label="Toggle Navigation Sidebar"
+            >
+              <Menu size={20} />
+            </button>
+
             <div className="topbar-breadcrumb">
-              <span className="topbar-brand-chip">{t('brand.fullName')}</span>
+              <span
+                className="breadcrumb-item breadcrumb-home"
+                onClick={() => navigate('/')}
+              >
+                {t('nav.dashboard')}
+              </span>
+              {location.pathname !== '/' && (
+                <>
+                  <span className="breadcrumb-separator">/</span>
+                  <span className="breadcrumb-item active">{activeNavItem.name}</span>
+                </>
+              )}
             </div>
           </div>
 
           <div className="topbar-right">
-            {/* Language Switcher (🇬🇧 EN | 🇰🇭 ខ្មែរ) */}
+            {/* Language Switcher */}
             <LanguageSwitcher />
 
             <div className="topbar-divider" />
 
-            {/* User Profile Card in Top Right */}
+            {/* User Profile Card */}
             <div
               className="topbar-user-card"
               onClick={() => navigate('/profile')}
@@ -213,8 +241,8 @@ export const DashboardLayout = () => {
                 {user?.username?.substring(0, 2).toUpperCase() || 'AD'}
               </div>
               <div className="topbar-user-info">
-                <p className="topbar-user-name">{user?.fullName || user?.username}</p>
-                <span className={`badge-role role-${primaryRole.toLowerCase()}`}>
+                <span className="topbar-user-name">{user?.fullName || user?.username}</span>
+                <span className={`topbar-role-badge role-${primaryRole.toLowerCase()}`}>
                   {t(`roles.${primaryRole.toLowerCase()}`, primaryRole)}
                 </span>
               </div>
@@ -222,7 +250,7 @@ export const DashboardLayout = () => {
           </div>
         </header>
 
-        <div className="content-inner">
+        <div className="content-inner" key={location.pathname}>
           <Outlet />
         </div>
       </main>
@@ -237,41 +265,59 @@ export const DashboardLayout = () => {
 
       {/* Sign Out Confirmation Modal */}
       {showLogoutModal && (
-        <div
-          className="signout-modal-backdrop"
-          onClick={() => !loggingOut && setShowLogoutModal(false)}
-          role="dialog"
-          aria-modal="true"
-        >
+        <ModalPortal>
           <div
-            className="signout-modal-card"
-            onClick={(e) => e.stopPropagation()}
+            className="signout-modal-backdrop"
+            onClick={() => !loggingOut && setShowLogoutModal(false)}
+            role="dialog"
+            aria-modal="true"
           >
-            <h3 className="signout-modal-title">{t('auth.signOutConfirmTitle')}</h3>
-            <p className="signout-modal-message">
-              {t('auth.signOutConfirmMsg')}
-            </p>
-            <div className="signout-modal-actions">
-              <button
-                type="button"
-                className="btn-signout-cancel"
-                data-no-loading="true"
-                onClick={() => setShowLogoutModal(false)}
-                disabled={loggingOut}
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                type="button"
-                className="btn-signout-confirm"
-                onClick={confirmLogout}
-                disabled={loggingOut}
-              >
-                {t('nav.signOut')}
-              </button>
+            <div
+              className="signout-modal-card"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="signout-modal-header">
+                <div className="signout-modal-icon-badge">
+                  <LogOut size={22} />
+                </div>
+                <button
+                  type="button"
+                  className="btn-modal-close"
+                  onClick={() => !loggingOut && setShowLogoutModal(false)}
+                  aria-label="Close"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="signout-modal-body">
+                <h3 className="signout-modal-title">{t('auth.signOutConfirmTitle')}</h3>
+                <p className="signout-modal-message">
+                  {t('auth.signOutConfirmMsg')}
+                </p>
+              </div>
+              <div className="signout-modal-actions">
+                <button
+                  type="button"
+                  className="btn-signout-cancel"
+                  data-no-loading="true"
+                  onClick={() => setShowLogoutModal(false)}
+                  disabled={loggingOut}
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  type="button"
+                  className="btn-signout-confirm"
+                  onClick={confirmLogout}
+                  disabled={loggingOut}
+                >
+                  <LogOut size={15} />
+                  <span>{t('nav.signOut')}</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

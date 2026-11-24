@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { courseApi } from '../api/courseApi';
+import { teacherApi } from '../api/teacherApi';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { ModalPortal } from '../components/ModalPortal';
 import {
   BookOpen,
   Search,
@@ -14,6 +16,8 @@ import {
   X,
   ArrowRight,
   RotateCw,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 export const CoursesPage = () => {
@@ -24,6 +28,12 @@ export const CoursesPage = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
+
+  // Pagination states
+  const [pageNo, setPageNo] = useState(0);
+  const [pageSize] = useState(12);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalElements, setTotalElements] = useState(0);
 
   // Auto-dismiss toast
   useEffect(() => {
@@ -41,6 +51,23 @@ export const CoursesPage = () => {
   const [maxFee, setMaxFee] = useState('');
   const [availableOnly, setAvailableOnly] = useState(false);
 
+  const [teachers, setTeachers] = useState([]);
+
+  // Fetch teachers for instructor selection
+  useEffect(() => {
+    const fetchTeachersList = async () => {
+      try {
+        const res = await teacherApi.getAllTeachers({ pageNo: 0, pageSize: 100 });
+        if (res.data) {
+          setTeachers(res.data.content || []);
+        }
+      } catch (err) {
+        console.error('Failed to load teachers for course creation', err);
+      }
+    };
+    fetchTeachersList();
+  }, []);
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [modalError, setModalError] = useState('');
   const [submittingCourse, setSubmittingCourse] = useState(false);
@@ -51,15 +78,20 @@ export const CoursesPage = () => {
     credit: '',
     fee: '',
     capacity: '',
+    teacherId: '',
   };
   const [courseFormData, setCourseFormData] = useState(initialCourseForm);
 
-  const fetchCourses = async () => {
+  const fetchCourses = async (overridePage) => {
     setLoading(true);
     try {
+      const currentPage = typeof overridePage === 'number' ? overridePage : pageNo;
       const params = {
-        pageNo: 0,
-        pageSize: 50,
+        pageNo: currentPage,
+        pageSize: 12,
+        PageSize: 12, // Support both casing for backend compatibility
+        sortBy: 'id',
+        sortDir: 'desc', // Newest courses appear first
       };
       if (search.trim()) params.search = search.trim();
       if (maxFee) params.maxFee = maxFee;
@@ -68,6 +100,8 @@ export const CoursesPage = () => {
       const res = await courseApi.getAllCourses(params);
       if (res.data) {
         setCourses(res.data.content || []);
+        setTotalPages(res.data.totalPages || 1);
+        setTotalElements(res.data.totalElements || 0);
       }
     } catch (err) {
       setToast({
@@ -82,11 +116,12 @@ export const CoursesPage = () => {
 
   useEffect(() => {
     fetchCourses();
-  }, [availableOnly]);
+  }, [pageNo, availableOnly]);
 
   const handleFilterSubmit = (e) => {
     e.preventDefault();
-    fetchCourses();
+    setPageNo(0);
+    fetchCourses(0);
   };
 
   const handleDeleteCourse = async (id, title) => {
@@ -132,6 +167,7 @@ export const CoursesPage = () => {
         credit: Number(courseFormData.credit),
         fee: Number(courseFormData.fee),
         capacity: Number(courseFormData.capacity),
+        teacherId: courseFormData.teacherId ? Number(courseFormData.teacherId) : undefined,
       };
 
       await courseApi.createCourse(payload);
@@ -142,7 +178,8 @@ export const CoursesPage = () => {
       });
       setShowAddModal(false);
       setCourseFormData(initialCourseForm);
-      fetchCourses();
+      setPageNo(0);
+      fetchCourses(0);
     } catch (err) {
       setModalError(err.message || 'Failed to create course.');
     } finally {
@@ -356,10 +393,39 @@ export const CoursesPage = () => {
         </div>
       )}
 
+      {/* Pagination Bar */}
+      {courses.length > 0 && (
+        <div className="pagination-bar" style={{ marginTop: '20px' }}>
+          <p className="pagination-info">
+            {t('common.showing')} {t('common.page')} <b>{pageNo + 1}</b> {t('common.of')} <b>{totalPages || 1}</b> ({t('common.total')}{' '}
+            {totalElements} {t('common.entries')})
+          </p>
+          <div className="pagination-controls">
+            <button
+              onClick={() => setPageNo((p) => Math.max(0, p - 1))}
+              disabled={pageNo === 0}
+              className="btn-page"
+            >
+              <ChevronLeft size={16} />
+              <span>{t('common.previous')}</span>
+            </button>
+            <button
+              onClick={() => setPageNo((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={pageNo >= totalPages - 1}
+              className="btn-page"
+            >
+              <span>{t('common.next')}</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Add Course Modal */}
       {showAddModal && (
-        <div className="modal-backdrop">
-          <div className="modal-card">
+        <ModalPortal>
+          <div className="modal-backdrop">
+            <div className="modal-card">
             <div className="modal-header">
               <div className="flex items-center gap-2">
                 <BookOpen className="text-indigo-600" size={22} />
@@ -451,6 +517,23 @@ export const CoursesPage = () => {
               </div>
 
               <div className="form-group">
+                <label>{t('teachers.teacherName')}</label>
+                <select
+                  name="teacherId"
+                  value={courseFormData.teacherId}
+                  onChange={handleCourseInputChange}
+                  className="select-input"
+                >
+                  <option value="">-- {t('courses.selectTeacher') || 'Select Instructor (Optional)'} --</option>
+                  {teachers.map((teach) => (
+                    <option key={teach.id} value={teach.id}>
+                      {teach.firstName} {teach.lastName} {teach.departmentName ? `(${teach.departmentName})` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
                 <label>{t('departments.description')}</label>
                 <textarea
                   name="description"
@@ -489,6 +572,7 @@ export const CoursesPage = () => {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

@@ -46,7 +46,7 @@ export const EnrollmentsPage = () => {
 
   // All enrollments table state
   const [allEnrollments, setAllEnrollments] = useState([]);
-  const [loadingAllEnrollments, setLoadingAllEnrollments] = useState(false);
+  const [loadingAllEnrollments, setLoadingAllEnrollments] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
@@ -72,7 +72,7 @@ export const EnrollmentsPage = () => {
 
   const refreshCourses = async () => {
     try {
-      const coRes = await courseApi.getAllCourses({ pageNo: 0, pageSize: 50 });
+      const coRes = await courseApi.getAllCourses({ pageNo: 0, pageSize: 100, PageSize: 100, sortBy: 'id', sortDir: 'desc' });
       if (coRes?.data?.content) {
         setCourses(coRes.data.content);
       }
@@ -96,6 +96,8 @@ export const EnrollmentsPage = () => {
 
   useEffect(() => {
     const loadOptions = async () => {
+      setLoadingInitial(true);
+      setLoadingAllEnrollments(true);
       try {
         let initialStudents = [];
         if (isStudent && (user?.email || user?.username)) {
@@ -109,12 +111,13 @@ export const EnrollmentsPage = () => {
           }
         }
 
-        const [stRes, coRes] = await Promise.allSettled([
-          studentApi.getAllStudents({ pageNo: 0, pageSize: 50 }),
-          courseApi.getAllCourses({ pageNo: 0, pageSize: 50 }),
+        const [stRes, coRes, enRes] = await Promise.allSettled([
+          studentApi.getAllStudents({ pageNo: 0, pageSize: 100 }),
+          courseApi.getAllCourses({ pageNo: 0, pageSize: 100, PageSize: 100, sortBy: 'id', sortDir: 'desc' }),
+          enrollmentApi.getAllEnrollments(),
         ]);
 
-        if (stRes.status === 'fulfilled' && stRes.value.data) {
+        if (stRes.status === 'fulfilled' && stRes.value?.data) {
           const list = stRes.value.data.content || [];
           const combined = [...initialStudents];
           list.forEach((item) => {
@@ -139,7 +142,7 @@ export const EnrollmentsPage = () => {
           }
         }
 
-        if (coRes.status === 'fulfilled' && coRes.value.data) {
+        if (coRes.status === 'fulfilled' && coRes.value?.data) {
           const cList = coRes.value.data.content || [];
           setCourses(cList);
           if (preselectedCourseId) {
@@ -147,9 +150,16 @@ export const EnrollmentsPage = () => {
           }
         }
 
-        fetchAllEnrollments();
+        if (enRes.status === 'fulfilled' && enRes.value?.data) {
+          setAllEnrollments(enRes.value.data || []);
+        } else {
+          setAllEnrollments([]);
+        }
+      } catch (err) {
+        console.error('Error loading enrollment options:', err);
       } finally {
         setLoadingInitial(false);
+        setLoadingAllEnrollments(false);
       }
     };
 
@@ -557,7 +567,7 @@ export const EnrollmentsPage = () => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div className="enrollments-filter-toolbar">
             {/* Filter Tabs / Pills */}
             <div className="filter-tabs-container">
               <button
@@ -565,7 +575,7 @@ export const EnrollmentsPage = () => {
                 className={`filter-tab-pill ${statusFilter === 'ALL' ? 'active' : ''}`}
                 onClick={() => setStatusFilter('ALL')}
               >
-                {t('common.all')} ({allEnrollments.length})
+                {t('common.all')} {loadingAllEnrollments ? '(…)' : `(${allEnrollments.length})`}
               </button>
               <button
                 type="button"
@@ -573,7 +583,7 @@ export const EnrollmentsPage = () => {
                 onClick={() => setStatusFilter('PENDING')}
               >
                 <Clock size={13} />
-                {t('status.pending')} ({pendingCount})
+                <span>{t('status.pending')} {loadingAllEnrollments ? '(…)' : `(${pendingCount})`}</span>
               </button>
               <button
                 type="button"
@@ -581,7 +591,7 @@ export const EnrollmentsPage = () => {
                 onClick={() => setStatusFilter('CONFIRMED')}
               >
                 <CheckCircle2 size={13} />
-                {t('status.confirmed')} ({confirmedCount})
+                <span>{t('status.confirmed')} {loadingAllEnrollments ? '(…)' : `(${confirmedCount})`}</span>
               </button>
               <button
                 type="button"
@@ -589,35 +599,25 @@ export const EnrollmentsPage = () => {
                 onClick={() => setStatusFilter('CANCELLED')}
               >
                 <X size={13} />
-                {t('status.cancelled')} ({cancelledCount})
+                <span>{t('status.cancelled')} {loadingAllEnrollments ? '(…)' : `(${cancelledCount})`}</span>
               </button>
             </div>
 
             {/* Clean Search Box with internal icon */}
-            <div className="input-with-icon" style={{ minWidth: '220px', maxWidth: '280px' }}>
+            <div className="input-with-icon enrollments-search-box">
               <Search size={16} className="input-icon" />
               <input
                 type="text"
                 placeholder={t('common.search')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ height: '36px', fontSize: '0.84rem' }}
               />
               {searchTerm && (
                 <button
                   type="button"
                   onClick={() => setSearchTerm('')}
-                  style={{
-                    position: 'absolute',
-                    right: '10px',
-                    background: 'none',
-                    border: 'none',
-                    color: '#94a3b8',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: 0,
-                  }}
+                  className="search-clear-btn"
+                  aria-label="Clear search"
                 >
                   <X size={14} />
                 </button>

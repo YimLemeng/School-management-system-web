@@ -4,6 +4,7 @@ import { departmentApi } from '../api/departmentApi';
 import { courseApi } from '../api/courseApi';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { ModalPortal } from '../components/ModalPortal';
 import {
   GraduationCap,
   Plus,
@@ -22,6 +23,8 @@ import {
   BookOpen,
   Building2,
   RotateCw,
+  PhoneCall,
+  FileText,
 } from 'lucide-react';
 
 export const TeachersPage = () => {
@@ -71,7 +74,7 @@ export const TeachersPage = () => {
     gender: 'MALE',
     departmentId: '',
     qualification: '',
-    yearsOfExperience: 3,
+    yearsOfExperience: '',
     emergencyPhone: '',
     bio: '',
   };
@@ -113,9 +116,6 @@ export const TeachersPage = () => {
         const res = await departmentApi.getAllDepartments();
         if (res.data) {
           setDepartments(res.data || []);
-          if (res.data.length > 0 && !formData.departmentId) {
-            setFormData((prev) => ({ ...prev, departmentId: res.data[0].id }));
-          }
         }
       } catch {
         // Optional
@@ -171,10 +171,7 @@ export const TeachersPage = () => {
     setIsEditing(false);
     setEditingId(null);
     setModalError('');
-    setFormData({
-      ...initialForm,
-      departmentId: departments[0]?.id || '',
-    });
+    setFormData(initialForm);
     setShowModal(true);
   };
 
@@ -189,9 +186,9 @@ export const TeachersPage = () => {
       email: teacher.email || '',
       phoneNumber: teacher.phoneNumber || '',
       gender: teacher.gender || 'MALE',
-      departmentId: deptMatch ? deptMatch.id : (departments[0]?.id || ''),
+      departmentId: deptMatch ? deptMatch.id : '',
       qualification: teacher.qualification || '',
-      yearsOfExperience: teacher.yearsOfExperience || 0,
+      yearsOfExperience: teacher.yearsOfExperience !== null && teacher.yearsOfExperience !== undefined ? teacher.yearsOfExperience : '',
       emergencyPhone: teacher.emergencyPhone || '',
       bio: teacher.bio || '',
     });
@@ -212,7 +209,7 @@ export const TeachersPage = () => {
         phoneNumber: formData.phoneNumber && formData.phoneNumber.trim() !== '' ? formData.phoneNumber.trim() : null,
         emergencyPhone: formData.emergencyPhone && formData.emergencyPhone.trim() !== '' ? formData.emergencyPhone.trim() : null,
         departmentId: formData.departmentId ? Number(formData.departmentId) : null,
-        yearsOfExperience: formData.yearsOfExperience ? Number(formData.yearsOfExperience) : 0,
+        yearsOfExperience: formData.yearsOfExperience !== '' && !isNaN(formData.yearsOfExperience) ? Number(formData.yearsOfExperience) : null,
       };
 
       if (isEditing) {
@@ -343,7 +340,6 @@ export const TeachersPage = () => {
                   <th>{t('teachers.teacherName')}</th>
                   <th>{t('teachers.email')}</th>
                   <th>{t('teachers.department')}</th>
-                  <th>{t('teachers.assignedCourses')}</th>
                   <th>{t('teachers.qualification')}</th>
                   <th>{t('teachers.hireDate')}</th>
                   <th>{t('common.actions')}</th>
@@ -367,23 +363,6 @@ export const TeachersPage = () => {
                         <Building2 size={13} className="badge-department-icon" />
                         <span>{teacher.departmentName || 'General'}</span>
                       </span>
-                    </td>
-                    <td>
-                      {teacherCoursesMap[teacher.id] && teacherCoursesMap[teacher.id].length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5 items-center">
-                          {teacherCoursesMap[teacher.id].map((c) => (
-                            <span
-                              key={c.id}
-                              className="badge-course-tag"
-                              title={`${c.code}: ${c.title}`}
-                            >
-                              {c.code}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 italic text-xs">None</span>
-                      )}
                     </td>
                     <td className="text-gray-700 text-sm">
                       {teacher.qualification || 'N/A'}
@@ -481,8 +460,9 @@ export const TeachersPage = () => {
 
       {/* Add / Edit Teacher Modal */}
       {showModal && (
-        <div className="modal-backdrop">
-          <div className="modal-card">
+        <ModalPortal>
+          <div className="modal-backdrop">
+            <div className="modal-card">
             <div className="modal-header">
               <h3>
                 {isEditing ? t('teachers.editTeacher') : t('teachers.addTeacher')}
@@ -546,11 +526,24 @@ export const TeachersPage = () => {
                   <input
                     type="text"
                     name="phoneNumber"
-                    placeholder="+85512345678"
+                    placeholder="e.g. +85512345678"
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
                   />
                 </div>
+                <div className="form-group">
+                  <label>{t('teachers.emergencyPhone')}</label>
+                  <input
+                    type="text"
+                    name="emergencyPhone"
+                    placeholder="e.g. +85598765432"
+                    value={formData.emergencyPhone}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row-2">
                 <div className="form-group">
                   <label>{t('students.gender')}</label>
                   <select
@@ -563,9 +556,6 @@ export const TeachersPage = () => {
                     <option value="FEMALE">{t('students.female')}</option>
                   </select>
                 </div>
-              </div>
-
-              <div className="form-row-2">
                 <div className="form-group">
                   <label>{t('teachers.department')}</label>
                   <select
@@ -574,6 +564,7 @@ export const TeachersPage = () => {
                     onChange={handleInputChange}
                     className="select-input"
                   >
+                    <option value="">-- {t('teachers.selectDepartment')} --</option>
                     {departments.map((d) => (
                       <option key={d.id} value={d.id}>
                         {d.name} ({d.code})
@@ -581,28 +572,30 @@ export const TeachersPage = () => {
                     ))}
                   </select>
                 </div>
+              </div>
 
+              <div className="form-row-2">
                 <div className="form-group">
-                  <label>{t('teachers.hireDate')}</label>
+                  <label>{t('teachers.yearsOfExperience')}</label>
                   <input
                     type="number"
                     min="0"
                     name="yearsOfExperience"
+                    placeholder="e.g. 3"
                     value={formData.yearsOfExperience}
                     onChange={handleInputChange}
                   />
                 </div>
-              </div>
-
-              <div className="form-group">
-                <label>{t('teachers.qualification')}</label>
-                <input
-                  type="text"
-                  name="qualification"
-                  placeholder="e.g. Ph.D. in Computer Science"
-                  value={formData.qualification}
-                  onChange={handleInputChange}
-                />
+                <div className="form-group">
+                  <label>{t('teachers.qualification')}</label>
+                  <input
+                    type="text"
+                    name="qualification"
+                    placeholder="e.g. Ph.D. in Computer Science"
+                    value={formData.qualification}
+                    onChange={handleInputChange}
+                  />
+                </div>
               </div>
 
               <div className="form-group">
@@ -645,12 +638,14 @@ export const TeachersPage = () => {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* View Teacher Details Modal */}
       {viewingTeacher && (
-        <div className="modal-backdrop">
-          <div className="modal-card" style={{ maxWidth: 540 }}>
+        <ModalPortal>
+          <div className="modal-backdrop">
+            <div className="modal-card" style={{ maxWidth: 540 }}>
             <div className="modal-header">
               <div className="flex items-center gap-2">
                 <Briefcase className="text-amber-600" size={22} />
@@ -698,7 +693,7 @@ export const TeachersPage = () => {
               <div className="profile-info-grid">
                 <div className="profile-info-item">
                   <div className="profile-info-label">
-                    <Mail size={13} />
+                    <Mail size={14} />
                     <span>{t('teachers.email')}</span>
                   </div>
                   <span className="profile-info-val">
@@ -708,7 +703,7 @@ export const TeachersPage = () => {
 
                 <div className="profile-info-item">
                   <div className="profile-info-label">
-                    <Phone size={13} />
+                    <Phone size={14} />
                     <span>{t('teachers.phoneNumber')}</span>
                   </div>
                   <span className="profile-info-val font-mono">
@@ -718,7 +713,17 @@ export const TeachersPage = () => {
 
                 <div className="profile-info-item">
                   <div className="profile-info-label">
-                    <Award size={13} />
+                    <PhoneCall size={14} />
+                    <span>{t('teachers.emergencyPhone')}</span>
+                  </div>
+                  <span className="profile-info-val font-mono">
+                    {viewingTeacher.emergencyPhone || 'N/A'}
+                  </span>
+                </div>
+
+                <div className="profile-info-item">
+                  <div className="profile-info-label">
+                    <Award size={14} />
                     <span>{t('teachers.qualification')}</span>
                   </div>
                   <span className="profile-info-val">
@@ -728,8 +733,8 @@ export const TeachersPage = () => {
 
                 <div className="profile-info-item">
                   <div className="profile-info-label">
-                    <Briefcase size={13} />
-                    <span>{t('teachers.hireDate')}</span>
+                    <Briefcase size={14} />
+                    <span>{t('teachers.yearsOfExperience')}</span>
                   </div>
                   <span className="profile-info-val" style={{ color: '#d97706' }}>
                     {viewingTeacher.yearsOfExperience || 0} Years
@@ -738,7 +743,7 @@ export const TeachersPage = () => {
 
                 <div className="profile-info-item">
                   <div className="profile-info-label">
-                    <BookOpen size={13} />
+                    <BookOpen size={14} />
                     <span>{t('teachers.assignedCourses')}</span>
                   </div>
                   <span className="profile-info-val" style={{ color: '#d97706', fontWeight: 700 }}>
@@ -797,7 +802,7 @@ export const TeachersPage = () => {
               {viewingTeacher.bio && (
                 <div className="profile-modal-section">
                   <div className="profile-modal-section-title">
-                    <BookOpen size={16} style={{ color: '#d97706' }} />
+                    <FileText size={16} style={{ color: '#d97706' }} />
                     <span>{t('departments.description')}</span>
                   </div>
                   <p className="text-xs text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-md border border-gray-100">
@@ -818,6 +823,7 @@ export const TeachersPage = () => {
             </div>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

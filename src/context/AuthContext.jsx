@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
     };
   }, [token, logout]);
 
-  // 3. Multi-Tab Session Synchronization: Instant logout across all open tabs
+  // 3. Multi-Tab Session Synchronization & Internal Logout Listener
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === 'accessToken') {
@@ -92,8 +92,22 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
+    const handleInternalLogout = () => {
+      if (expiryTimerRef.current) {
+        clearTimeout(expiryTimerRef.current);
+        expiryTimerRef.current = null;
+      }
+      setToken(null);
+      setUser(null);
+    };
+
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('auth:logout', handleInternalLogout);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth:logout', handleInternalLogout);
+    };
   }, [token, logout]);
 
   // 4. Session Verification with Backend /auth/me
@@ -114,9 +128,14 @@ export const AuthProvider = ({ children }) => {
             setUser(verifiedUser);
             localStorage.setItem('currentUser', JSON.stringify(verifiedUser));
           }
-        } catch {
+        } catch (err) {
           if (isMounted) {
-            logout('verification_failed');
+            // Only force logout if the server rejected credentials (401)
+            // Preserve session on temporary offline or network hiccups
+            const isAuthError = err?.message?.includes('401') || err?.response?.status === 401;
+            if (isAuthError) {
+              logout('verification_failed');
+            }
           }
         }
       } else if (token && isTokenExpired(token)) {

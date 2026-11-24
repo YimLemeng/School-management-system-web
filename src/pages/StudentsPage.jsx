@@ -3,6 +3,7 @@ import { studentApi } from '../api/studentApi';
 import { enrollmentApi } from '../api/enrollmentApi';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { ModalPortal } from '../components/ModalPortal';
 import {
   Search,
   Plus,
@@ -48,6 +49,7 @@ export const StudentsPage = () => {
   // Pagination & Filter state
   const [search, setSearch] = useState('');
   const [gender, setGender] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [pageNo, setPageNo] = useState(0);
   const [pageSize] = useState(6);
   const [totalPages, setTotalPages] = useState(1);
@@ -66,11 +68,13 @@ export const StudentsPage = () => {
     phoneNumber: '',
     dateOfBirth: '',
     gender: 'MALE',
+    isActive: true,
   };
 
   const [formData, setFormData] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [togglingId, setTogglingId] = useState(null);
 
   // View Student Modal State
   const [viewingStudent, setViewingStudent] = useState(null);
@@ -89,6 +93,8 @@ export const StudentsPage = () => {
       };
       if (search.trim()) params.search = search.trim();
       if (gender) params.gender = gender;
+      if (statusFilter === 'active') params.isActive = true;
+      if (statusFilter === 'inactive') params.isActive = false;
 
       const res = await studentApi.getAllStudents(params);
       if (res.data) {
@@ -109,7 +115,7 @@ export const StudentsPage = () => {
 
   useEffect(() => {
     fetchStudents();
-  }, [pageNo, gender]);
+  }, [pageNo, gender, statusFilter]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -141,8 +147,40 @@ export const StudentsPage = () => {
       phoneNumber: st.phoneNumber || '',
       dateOfBirth: st.dateOfBirth || '',
       gender: st.gender || 'MALE',
+      isActive: st.isActive !== false,
     });
     setShowModal(true);
+  };
+
+  const handleToggleStatus = async (st) => {
+    if (!isAdmin) return;
+    const newStatus = !st.isActive;
+    setTogglingId(st.id);
+    try {
+      await studentApi.updateStudent(st.id, {
+        firstName: st.firstName,
+        lastName: st.lastName,
+        email: st.email,
+        phoneNumber: st.phoneNumber && st.phoneNumber.trim() !== '' ? st.phoneNumber.trim() : null,
+        dateOfBirth: st.dateOfBirth ? st.dateOfBirth : null,
+        gender: st.gender,
+        isActive: newStatus,
+      });
+      setToast({
+        type: 'success',
+        title: 'Status Updated',
+        message: `${st.firstName} ${st.lastName}: ${newStatus ? t('status.active') : t('status.inactive')}.`,
+      });
+      fetchStudents();
+    } catch (err) {
+      setToast({
+        type: 'error',
+        title: 'Status Update Failed',
+        message: err.message || 'Failed to update student status.',
+      });
+    } finally {
+      setTogglingId(null);
+    }
   };
 
   const handleSubmitStudent = async (e) => {
@@ -158,6 +196,7 @@ export const StudentsPage = () => {
         phoneNumber: formData.phoneNumber && formData.phoneNumber.trim() !== '' ? formData.phoneNumber.trim() : null,
         dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth : null,
         gender: formData.gender,
+        ...(isEditing ? { isActive: formData.isActive } : {}),
       };
 
       if (isEditing) {
@@ -309,6 +348,22 @@ export const StudentsPage = () => {
             </select>
           </div>
 
+          <div className="filter-group select-wrapper-with-icon">
+            <Filter size={16} className="select-lead-icon" />
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPageNo(0);
+              }}
+              className="select-input select-with-lead-icon"
+            >
+              <option value="">{t('students.allStatus')}</option>
+              <option value="active">{t('status.active')}</option>
+              <option value="inactive">{t('status.inactive')}</option>
+            </select>
+          </div>
+
           <button
             type="submit"
             className="btn btn-secondary flex items-center gap-1.5"
@@ -349,6 +404,7 @@ export const StudentsPage = () => {
                   <th>{t('students.email')}</th>
                   <th>{t('students.phoneNumber')}</th>
                   <th>{t('students.gender')}</th>
+                  <th style={{ textAlign: 'center', width: '130px' }}>{t('common.status')}</th>
                   <th>{t('students.dateOfBirth')}</th>
                   <th>{t('common.actions')}</th>
                 </tr>
@@ -368,6 +424,32 @@ export const StudentsPage = () => {
                       <span className={`badge-gender ${st.gender?.toLowerCase()}`}>
                         {st.gender === 'MALE' ? t('students.male') : st.gender === 'FEMALE' ? t('students.female') : st.gender}
                       </span>
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleStatus(st)}
+                        disabled={!isAdmin || togglingId === st.id}
+                        className={`student-status-toggle-btn ${
+                          st.isActive !== false ? 'status-active' : 'status-inactive'
+                        }`}
+                        title={
+                          isAdmin
+                            ? st.isActive !== false
+                              ? 'Click to set Inactive (ឈប់រៀន)'
+                              : 'Click to set Active (នៅរៀន)'
+                            : undefined
+                        }
+                      >
+                        {togglingId === st.id ? (
+                          <span className="btn-spinner" style={{ width: 12, height: 12 }}></span>
+                        ) : (
+                          <span className="status-indicator-dot"></span>
+                        )}
+                        <span>
+                          {st.isActive !== false ? t('status.active') : t('status.inactive')}
+                        </span>
+                      </button>
                     </td>
                     <td className="text-gray-600 text-sm">{st.dateOfBirth}</td>
                     <td className="actions-cell">
@@ -459,17 +541,18 @@ export const StudentsPage = () => {
 
       {/* Add Student Modal */}
       {showModal && (
-        <div className="modal-backdrop">
-          <div className="modal-card">
-            <div className="modal-header">
-              <h3>{isEditing ? t('students.editStudent') : t('students.addStudent')}</h3>
-              <button
-                onClick={() => setShowModal(false)}
-                className="btn-close"
-              >
-                <X size={20} />
-              </button>
-            </div>
+        <ModalPortal>
+          <div className="modal-backdrop">
+            <div className="modal-card">
+              <div className="modal-header">
+                <h3>{isEditing ? t('students.editStudent') : t('students.addStudent')}</h3>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="btn-close"
+                >
+                  <X size={20} />
+                </button>
+              </div>
 
             <form onSubmit={handleSubmitStudent} className="modal-form">
               {modalError && (
@@ -552,6 +635,23 @@ export const StudentsPage = () => {
                 />
               </div>
 
+              {isEditing && (
+                <div className="form-group">
+                  <label>{t('common.status')}</label>
+                  <select
+                    name="isActive"
+                    value={formData.isActive ? 'true' : 'false'}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, isActive: e.target.value === 'true' }))
+                    }
+                    className="select-input"
+                  >
+                    <option value="true">{t('status.active')}</option>
+                    <option value="false">{t('status.inactive')}</option>
+                  </select>
+                </div>
+              )}
+
               <div className="modal-footer">
                 <button
                   type="button"
@@ -581,13 +681,15 @@ export const StudentsPage = () => {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* View Student Details Modal */}
       {viewingStudent && (
-        <div className="modal-backdrop">
-          <div className="modal-card" style={{ maxWidth: 540 }}>
-            <div className="modal-header">
+        <ModalPortal>
+          <div className="modal-backdrop">
+            <div className="modal-card" style={{ maxWidth: 540 }}>
+              <div className="modal-header">
               <div className="flex items-center gap-2">
                 <GraduationCap className="text-indigo-600" size={22} />
                 <h3 className="text-lg font-bold">{t('students.viewDetails')}</h3>
@@ -618,6 +720,10 @@ export const StudentsPage = () => {
                     </span>
                     <span className={`badge-gender ${viewingStudent.gender?.toLowerCase()}`}>
                       {viewingStudent.gender === 'MALE' ? t('students.male') : viewingStudent.gender === 'FEMALE' ? t('students.female') : viewingStudent.gender}
+                    </span>
+                    <span className={`student-status-badge ${viewingStudent.isActive !== false ? 'status-active' : 'status-inactive'}`}>
+                      <span className="status-indicator-dot"></span>
+                      <span>{viewingStudent.isActive !== false ? t('status.active') : t('status.inactive')}</span>
                     </span>
                   </div>
                 </div>
@@ -715,6 +821,7 @@ export const StudentsPage = () => {
             </div>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

@@ -2,9 +2,15 @@
  * Security utilities for client-side JWT validation, expiration checks, and role integrity.
  */
 
+export const cleanToken = (token) => {
+  if (!token || typeof token !== 'string') return '';
+  return token.trim().replace(/^["']|["']$/g, '');
+};
+
 export const parseJwt = (token) => {
-  if (!token || typeof token !== 'string') return null;
-  const parts = token.split('.');
+  const cleaned = cleanToken(token);
+  if (!cleaned) return null;
+  const parts = cleaned.split('.');
   if (parts.length !== 3) return null;
 
   try {
@@ -54,8 +60,8 @@ export const getTimeUntilExpiry = (token) => {
 };
 
 export const isSafeTokenString = (token) => {
-  if (!token || typeof token !== 'string') return false;
-  const trimmed = token.trim();
+  const cleaned = cleanToken(token);
+  if (!cleaned) return false;
   // Valid JWT structure: 3 base64url segments separated by dots, no newlines/control chars
-  return /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/.test(trimmed);
+  return /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+$/.test(cleaned);
 };

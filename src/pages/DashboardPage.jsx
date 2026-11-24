@@ -13,6 +13,7 @@ import {
   UserCheck,
   ArrowRight,
   RotateCw,
+  Building2,
 } from 'lucide-react';
 
 export const DashboardPage = () => {
@@ -116,47 +117,83 @@ export const DashboardPage = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* AdminLTE Small Boxes */}
       <div className="stats-grid">
         {(isAdmin || isTeacher) && (
-          <div className="stat-card stat-card-students">
-            <div className="stat-icon-wrapper stat-icon-students">
-              <Users size={24} />
+          <div className="small-box bg-info">
+            <div className="inner">
+              <h3>{stats.loading ? '...' : stats.studentsCount}</h3>
+              <p>{t('dashboard.stats.totalStudents')}</p>
             </div>
-            <div className="stat-info">
-              <p className="stat-label">{t('dashboard.stats.totalStudents')}</p>
-              <h3 className="stat-value">
-                {stats.loading ? '...' : stats.studentsCount}
-              </h3>
+            <div className="icon">
+              <Users size={64} />
             </div>
+            <Link to="/students" className="small-box-footer">
+              <span>{t('common.moreInfo')}</span>
+              <ArrowRight size={14} />
+            </Link>
           </div>
         )}
 
         {isAdmin && (
-          <div className="stat-card stat-card-teachers">
-            <div className="stat-icon-wrapper stat-icon-teachers">
-              <Briefcase size={24} />
+          <div className="small-box bg-success">
+            <div className="inner">
+              <h3>{stats.loading ? '...' : stats.teachersCount}</h3>
+              <p>{t('dashboard.stats.totalTeachers')}</p>
             </div>
-            <div className="stat-info">
-              <p className="stat-label">{t('dashboard.stats.totalTeachers')}</p>
-              <h3 className="stat-value">
-                {stats.loading ? '...' : stats.teachersCount}
-              </h3>
+            <div className="icon">
+              <Briefcase size={64} />
             </div>
+            <Link to="/teachers" className="small-box-footer">
+              <span>{t('common.moreInfo')}</span>
+              <ArrowRight size={14} />
+            </Link>
           </div>
         )}
 
-        <div className="stat-card stat-card-courses">
-          <div className="stat-icon-wrapper stat-icon-courses">
-            <BookOpen size={24} />
+        <div className="small-box bg-warning">
+          <div className="inner">
+            <h3>{stats.loading ? '...' : stats.coursesCount}</h3>
+            <p>{t('dashboard.stats.activeCourses')}</p>
           </div>
-          <div className="stat-info">
-            <p className="stat-label">{t('dashboard.stats.activeCourses')}</p>
-            <h3 className="stat-value">
-              {stats.loading ? '...' : stats.coursesCount}
-            </h3>
+          <div className="icon">
+            <BookOpen size={64} />
           </div>
+          <Link to="/courses" className="small-box-footer">
+            <span>{t('common.moreInfo')}</span>
+            <ArrowRight size={14} />
+          </Link>
         </div>
+
+        {isAdmin ? (
+          <div className="small-box bg-danger">
+            <div className="inner">
+              <h3>{stats.loading ? '...' : stats.departmentsCount}</h3>
+              <p>{t('nav.departments')}</p>
+            </div>
+            <div className="icon">
+              <Building2 size={64} />
+            </div>
+            <Link to="/departments" className="small-box-footer">
+              <span>{t('common.moreInfo')}</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+        ) : (
+          <div className="small-box bg-primary">
+            <div className="inner">
+              <h3>{t('nav.enrollments')}</h3>
+              <p>{t('dashboard.quickActions.enrollCourse')}</p>
+            </div>
+            <div className="icon">
+              <UserCheck size={64} />
+            </div>
+            <Link to="/enrollments" className="small-box-footer">
+              <span>{t('common.moreInfo')}</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Quick Navigation Cards */}
